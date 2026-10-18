@@ -2,10 +2,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
+def normalize_text(text):
+    """Normalize line endings and whitespace without joining paragraphs."""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [" ".join(line.split()) for line in normalized.split("\n")]
+    return "\n".join(lines)
+
+
 def split_paragraph(text):
     return [
-        paragraph.strip()
-        for paragraph in text.replace("\r\n", "\n").split("\n\n")
+        normalize_text(paragraph).strip()
+        for paragraph in normalize_text(text).split("\n\n")
         if paragraph.strip()
     ]
 

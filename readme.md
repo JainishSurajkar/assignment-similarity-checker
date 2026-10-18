@@ -14,7 +14,7 @@ paragraph and identifies pairs and groups with similar content.
 - Filter displayed paragraph pairs with a similarity threshold from `0%` to
   `100%`.
 - Display matching paragraphs side by side for easier comparison.
-- Highlight shared words when the selected threshold is below `50%`.
+- Optionally highlight shared individual words with a separate checkbox.
 - Use a different color for each shared word, with the same color applied in
   both paragraphs.
 - Show the similarity percentage for every displayed paragraph pair.
@@ -31,7 +31,7 @@ paragraph and identifies pairs and groups with similar content.
 ## Requirements
 
 - Python 3.10 or newer
-- The packages listed in [`requirement.txt`](./requirement.txt)
+- The packages listed in [`requirements.txt`](./requirements.txt)
 
 ## Installation
 
@@ -52,7 +52,7 @@ paragraph and identifies pairs and groups with similar content.
 4. Install the dependencies:
 
    ```powershell
-   pip install -r requirement.txt
+   pip install -r requirements.txt
    ```
 
 ## Running the application
@@ -73,13 +73,16 @@ automatically, visit the local URL shown in the terminal.
    three to fifty files for collection analysis.
 3. Click **Compare assignments** after the files are successfully read.
 4. Adjust the relevant similarity threshold to filter the results.
-5. Expand a result to view the compared paragraphs side by side.
-6. Set the threshold below `50%` to see shared words highlighted.
+5. Use **Show shared-word highlighting** if you want common words marked.
+6. Expand a result to view the compared paragraphs side by side.
 7. Download the results as a CSV file if needed.
 
 The application compares every paragraph in Assignment A with every paragraph
-in Assignment B. A higher threshold displays only paragraph pairs with higher
-similarity scores.
+in Assignment B. The results summary shows the number of assignments, the
+number of paragraph pairs compared, and the number currently displayed. A
+higher threshold displays only paragraph pairs with higher similarity scores.
+The highlighting option marks common individual words; it does not identify
+exact copied phrases or establish plagiarism.
 
 ### Lexical versus semantic comparison
 
@@ -137,16 +140,17 @@ similarity, and each assignment's closest cluster member.
 
 - **TXT**: Read as UTF-8 text.
 - **PDF**: Text is extracted from each page. Scanned PDFs that contain only
-  images require OCR and are not supported.
-- **DOCX**: Text is extracted from the document paragraphs.
+  images require OCR and are not supported. Password-protected PDFs are not
+  supported.
+- **DOCX**: Text is extracted from document paragraphs and table rows.
 
 Legacy `.doc` files are not supported. Save Word documents as `.docx` before
 uploading them.
 
 ## How similarity is calculated
 
-1. Each assignment is split into paragraphs using two consecutive newline
-   characters.
+1. Line endings are normalized and excessive whitespace is removed while
+   blank-line paragraph boundaries are preserved.
 2. All paragraphs are converted into TF-IDF vectors with
    `TfidfVectorizer`.
 3. Cosine similarity is calculated for every Assignment A and Assignment B
@@ -177,7 +181,7 @@ assignment-similarity-checker/
 │   ├── file_extraction.py    # TXT, PDF, and DOCX text extraction
 │   ├── similarity.py          # Paragraph splitting and similarity calculation
 │   └── text_preprocessing.py # Additional preprocessing examples/utilities
-├── requirement.txt            # Python dependencies
+├── requirements.txt            # Python dependencies
 ├── docs/
 │   ├── annotation_guidelines.md
 │   └── test_pairs.csv

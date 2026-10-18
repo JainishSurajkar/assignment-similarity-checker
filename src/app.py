@@ -13,7 +13,7 @@ from collection_similarity import (
 )
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
 from lexical_semantic import compare_lexical_and_semantic
-from pypdf.errors import PdfReadError
+from pypdf.errors import FileNotDecryptedError, PdfReadError
 from similarity import compare_paragraphs
 
 
@@ -102,18 +102,22 @@ def lexical_semantic_csv(results):
     return results.to_csv(index=False)
 
 
-def sync_uploaded_file(uploaded_file, text_key, upload_key):
+def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
     if uploaded_file is None:
         st.session_state[text_key] = ""
         st.session_state[upload_key] = None
-        st.session_state.results = None
+        st.session_state[error_key] = None
+        clear_pair_results()
         return
 
     file_bytes = uploaded_file.getvalue()
     if len(file_bytes) > MAX_FILE_SIZE_BYTES:
         st.session_state[text_key] = ""
         st.session_state[upload_key] = None
-        st.session_state.results = None
+        st.session_state[error_key] = (
+            f"'{uploaded_file.name}' is larger than 10 MB."
+        )
+        clear_pair_results()
         st.session_state.input_error = (
             f"'{uploaded_file.name}' is larger than 10 MB."
         )
@@ -124,33 +128,33 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key):
     if st.session_state.get(upload_key) == file_signature:
         return
 
+    clear_pair_results()
+    st.session_state.input_error = None
+    st.session_state[error_key] = None
     try:
         st.session_state[text_key] = extract_text(uploaded_file)
         st.session_state[upload_key] = file_signature
-        st.session_state.input_error = None
-        st.session_state.results = None
-        clear_semantic_results()
     except (
         UnicodeDecodeError,
         ValueError,
         OSError,
+        FileNotDecryptedError,
         PdfReadError,
         PackageNotFoundError,
     ) as error:
         st.session_state[text_key] = ""
         st.session_state[upload_key] = file_signature
-        st.session_state.input_error = str(error)
-        clear_semantic_results()
+        st.session_state[error_key] = str(error)
 
 
-def compare_on_threshold_change():
+def compare_assignments():
     assignment_a = st.session_state.assignment_a
     assignment_b = st.session_state.assignment_b
 
     if not assignment_a.strip() or not assignment_b.strip():
         st.session_state.results = None
         st.session_state.input_error = (
-            "Please provide both assignments before adjusting the slider."
+            "Please upload two readable assignments before comparing."
         )
         return
 
@@ -207,6 +211,7 @@ def extract_documents(uploaded_files):
             UnicodeDecodeError,
             ValueError,
             OSError,
+            FileNotDecryptedError,
             PdfReadError,
             PackageNotFoundError,
         ) as error:
@@ -236,12 +241,17 @@ def clear_collection_results():
     st.session_state.cluster_input_signature = None
 
 
+def clear_pair_results():
+    st.session_state.results = None
+    clear_semantic_results()
+
+
 def clear_semantic_results():
     st.session_state.lexical_semantic_results = None
     st.session_state.lexical_semantic_signature = None
 
 
-def render_pair_content(match, threshold):
+def render_pair_content(match, show_highlighting=False):
     assignment_col, comparison_col = st.columns(2)
 
     with assignment_col:
@@ -249,7 +259,7 @@ def render_pair_content(match, threshold):
     with comparison_col:
         st.markdown("**Assignment B**")
 
-    if threshold < 50:
+    if show_highlighting:
         colors = word_colors(
             shared_words(match["text_a"], match["text_b"])
         )
@@ -270,13 +280,13 @@ def render_pair_content(match, threshold):
             st.write(match["text_b"])
 
 
-def render_pair_result(match, threshold):
+def render_pair_result(match, show_highlighting):
     with st.expander(
         f"Paragraph A{match['paragraph_a']} - "
         f"Paragraph B{match['paragraph_b']} - "
         f"{match['similarity'] * 100:.1f}%"
     ):
-        render_pair_content(match, threshold)
+        render_pair_content(match, show_highlighting)
 
 
 def render_two_assignment_mode(uploaded_files):
@@ -285,11 +295,13 @@ def render_two_assignment_mode(uploaded_files):
         uploaded_a,
         "assignment_a",
         "assignment_a_upload_signature",
+        "assignment_a_error",
     )
     sync_uploaded_file(
         uploaded_b,
         "assignment_b",
         "assignment_b_upload_signature",
+        "assignment_b_error",
     )
 
     both_uploaded = bool(
@@ -297,23 +309,39 @@ def render_two_assignment_mode(uploaded_files):
         and st.session_state.assignment_b.strip()
     )
     if not both_uploaded:
-        if st.session_state.input_error:
-            st.error(st.session_state.input_error)
+        errors = [
+            st.session_state.get("assignment_a_error"),
+            st.session_state.get("assignment_b_error"),
+        ]
+        for error in errors:
+            if error:
+                st.error(error)
         return
 
     st.caption(
-        f"Assignment A: {len(st.session_state.assignment_a):,} characters · "
-        f"Assignment B: {len(st.session_state.assignment_b):,} characters"
+        f"Assignment A: {uploaded_a.name} · "
+        f"{len(st.session_state.assignment_a):,} extracted characters\n\n"
+        f"Assignment B: {uploaded_b.name} · "
+        f"{len(st.session_state.assignment_b):,} extracted characters"
     )
 
     if st.button("Compare assignments", type="primary", key="compare_two"):
-        compare_on_threshold_change()
+        with st.spinner("Comparing assignment paragraphs..."):
+            compare_assignments()
 
     threshold = st.slider(
-        "Minimum similarity to display",
+        "Minimum score to display (%)",
         min_value=0,
         max_value=100,
         key="similarity_threshold",
+    )
+    show_highlighting = st.checkbox(
+        "Show shared-word highlighting",
+        key="show_shared_word_highlighting",
+        help=(
+            "Highlights common individual words. This does not identify "
+            "exactly copied phrases or prove plagiarism."
+        ),
     )
 
     if st.session_state.results is None:
@@ -327,8 +355,16 @@ def render_two_assignment_mode(uploaded_files):
     st.subheader("Similar Paragraphs")
     st.caption(
         f"Showing {len(matches)} of {len(st.session_state.results)} "
-        f"paragraph pairs with similarity of at least {threshold}%."
+        f"paragraph pairs with a TF-IDF cosine similarity of at least "
+        f"{threshold}%."
     )
+    summary_columns = st.columns(3)
+    summary_columns[0].metric("Assignments", 2)
+    summary_columns[1].metric(
+        "Pairs compared",
+        f"{len(st.session_state.results):,}",
+    )
+    summary_columns[2].metric("Matches shown", len(matches))
     if st.session_state.results:
         st.download_button(
             "Download paragraph results (CSV)",
@@ -338,9 +374,9 @@ def render_two_assignment_mode(uploaded_files):
             key="download_two_results",
         )
     if not matches:
-        st.info("No paragraph pairs meet this threshold.")
+        st.info("No paragraph pairs meet the selected score threshold.")
     for match in matches:
-        render_pair_result(match, threshold)
+        render_pair_result(match, show_highlighting)
 
     st.subheader("Lexical vs semantic comparison")
     st.write(
@@ -417,7 +453,7 @@ def render_two_assignment_mode(uploaded_files):
                         "text_a": result.text_a,
                         "text_b": result.text_b,
                     },
-                    threshold=49,
+                    show_highlighting=show_highlighting,
                 )
     elif semantic_results is not None:
         st.info("The uploaded assignments changed. Run the semantic comparison again.")
@@ -498,6 +534,14 @@ def render_collection_mode(uploaded_files):
         value=50,
         key="group_threshold",
     )
+    show_highlighting = st.checkbox(
+        "Show shared-word highlighting in paragraph details",
+        key="collection_show_shared_word_highlighting",
+        help=(
+            "Highlights common individual words, not exact matching phrases "
+            "and not proof of plagiarism."
+        ),
+    )
     groups = find_similarity_groups(matrix, group_threshold)
     if not groups:
         st.info("No groups of two or more assignments meet this threshold.")
@@ -530,7 +574,7 @@ def render_collection_mode(uploaded_files):
                 ):
                     render_pair_content(
                         result,
-                        threshold=49 if threshold < 50 else 50,
+                        show_highlighting=show_highlighting,
                     )
 
     st.subheader("Clustering and pattern discovery")
@@ -602,6 +646,12 @@ st.write(
 )
 
 for key, default in (
+    ("assignment_a", ""),
+    ("assignment_b", ""),
+    ("assignment_a_upload_signature", None),
+    ("assignment_b_upload_signature", None),
+    ("assignment_a_error", None),
+    ("assignment_b_error", None),
     ("results", None),
     ("similarity_threshold", 20),
     ("input_error", None),
@@ -633,8 +683,10 @@ uploaded_files = st.file_uploader(
 
 if len(uploaded_files) > MAX_ASSIGNMENTS:
     st.error("Please upload no more than 50 assignments.")
+    clear_pair_results()
     clear_collection_results()
 elif len(uploaded_files) < 2:
+    clear_pair_results()
     clear_collection_results()
     st.info(
         "Upload exactly 2 files for a detailed comparison, or at least 3 "
