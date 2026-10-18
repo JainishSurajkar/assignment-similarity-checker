@@ -1,0 +1,7 @@
+pair_id,text_a,text_b,label,reason,split
+P01,Algorithm learns patterns from data.,The model identifies patterns in training examples.,1,Close paraphrase,train
+P02,Supervised learning uses labelled data.,Unsupervised learning discovers groups without labels.,0,Different claims,train
+P03,Photosynthesis converts light energy into chemical energy.,Photosynthesis converts light energy into chemical energy.,1,Exact match,validation
+P04,A database stores organized information.,A bicycle has two wheels and pedals.,0,Unrelated content,validation
+P05,The algorithm uses training examples to predict outcomes.,Training data helps a model make predictions.,1,Close paraphrase,test
+P06,The heart pumps blood through the body.,The water cycle includes evaporation and rainfall.,0,Unrelated content,test

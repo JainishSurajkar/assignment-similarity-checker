@@ -25,6 +25,8 @@ paragraph and identifies pairs and groups with similar content.
   similarity summaries.
 - Compare lexical TF-IDF similarity with semantic sentence-embedding
   similarity for two assignments.
+- Evaluate both methods on manually labelled paragraph pairs with precision,
+  recall, F1-score, and error analysis.
 
 ## Requirements
 
@@ -98,6 +100,27 @@ while TF-IDF remains more interpretable and often stronger for near-identical
 copying. The embedding model may truncate very long paragraphs, so paragraph
 length and domain should be considered when interpreting results.
 
+## Evaluation
+
+Annotation rules are documented in
+[`docs/annotation_guidelines.md`](./docs/annotation_guidelines.md). Add
+manually reviewed pairs to [`docs/test_pairs.csv`](./docs/test_pairs.csv),
+using `1` for substantial overlap and `0` for no substantial overlap. Keep
+related pairs in the same `train`, `validation`, or `test` split where
+possible.
+
+Run the evaluation script from the project root:
+
+```powershell
+python src\evaluate_models.py
+```
+
+It creates `docs\evaluation\scored_pairs.csv`, `metrics.csv`, and separate
+error files for each method. Thresholds are selected by F1-score on the
+validation split and measured on the held-out test split. If no split column
+is provided, the script reports exploratory metrics at a 50% threshold; those
+metrics should not be presented as final performance results.
+
 ### Collection analysis
 
 When three or more files are uploaded, the app displays the similarity matrix,
@@ -150,10 +173,14 @@ assignment-similarity-checker/
 │   ├── collection_similarity.py # Collection similarity and grouping
 │   ├── cluster_analysis.py    # Hierarchical clustering and summaries
 │   ├── lexical_semantic.py    # Lexical and embedding-based comparison
+│   ├── evaluate_models.py     # Reproducible model evaluation
 │   ├── file_extraction.py    # TXT, PDF, and DOCX text extraction
 │   ├── similarity.py          # Paragraph splitting and similarity calculation
 │   └── text_preprocessing.py # Additional preprocessing examples/utilities
 ├── requirement.txt            # Python dependencies
+├── docs/
+│   ├── annotation_guidelines.md
+│   └── test_pairs.csv
 ├── readme.md                  # Project documentation
 └── .gitignore                 # Ignored local files and environments
 ```
