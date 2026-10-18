@@ -4,7 +4,8 @@ A Streamlit application that compares two assignments paragraph by paragraph and
 
 ## Features
 
-- Compare two assignment texts side by side.
+- Compare two uploaded assignments.
+- Upload TXT, PDF, or DOCX files for either assignment.
 - Split assignments into paragraphs using blank lines.
 - Calculate paragraph similarity with TF-IDF and cosine similarity.
 - Choose a minimum similarity threshold from `0%` to `100%`.
@@ -50,11 +51,10 @@ Streamlit will open the application in your browser. If it does not open automat
 
 ## Usage
 
-1. Paste the first assignment into **Assignment A**.
-2. Paste the second assignment into **Assignment B**.
-3. Separate paragraphs with a blank line.
-4. Adjust the **Minimum similarity to display** slider.
-5. Review the matching paragraph pairs shown below the slider.
+1. Upload a TXT, PDF, or DOCX file for **Assignment A**.
+2. Upload a TXT, PDF, or DOCX file for **Assignment B**.
+3. Adjust the **Minimum similarity to display** slider, which appears after both uploads are successfully read.
+4. Review the matching paragraph pairs shown below the slider.
 
 The application compares every paragraph in Assignment A with every paragraph in Assignment B. Increasing the threshold shows only more closely matching pairs.
 
@@ -62,8 +62,10 @@ The application compares every paragraph in Assignment A with every paragraph in
 
 ```text
 assignment-similarity-checker/
-├── app.py                 # Streamlit user interface
-├── similarity.py          # Paragraph splitting and similarity calculations
+├── src/
+│   ├── app.py             # Streamlit user interface
+│   ├── file_extraction.py # TXT, PDF, and DOCX text extraction
+│   └── similarity.py      # Paragraph splitting and similarity calculations
 ├── requirement.txt        # Python dependencies
 ├── readme.md              # Project documentation
 └── .gitignore             # Ignored local files and environments

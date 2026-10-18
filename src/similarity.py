@@ -45,28 +45,3 @@ def compare_paragraphs(text_a, text_b):
     )
 
     return results
-
-
-
-
-# assignment_a = """
-# Machine learning helps computers learn from data.
-# It is used in healthcare and education.
-# """
-
-# assignment_b = """
-# Computers learn patterns from data using machine learning.
-# It is useful in healthcare and education.
-# """
-
-# documents = [assignment_a, assignment_b]
-
-# vectorizer = TfidfVectorizer()
-# tfidf_matrix = vectorizer.fit_transform(documents)
-
-# score = cosine_similarity(
-#     tfidf_matrix[0:1],
-#     tfidf_matrix[1:2]
-# )[0][0]
-
-# print(f"Similarity: {score * 100:.2f}%")
