@@ -1,9 +1,15 @@
 import hashlib
 import html
 import re
+from io import StringIO
+import csv
 
 import streamlit as st
 from docx.opc.exceptions import PackageNotFoundError
+from collection_similarity import (
+    compare_document_collection,
+    find_similarity_groups,
+)
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
 from pypdf.errors import PdfReadError
 from similarity import compare_paragraphs
@@ -20,6 +26,8 @@ HIGHLIGHT_COLORS = (
     "#a0c4ff",
     "#f1c0e8",
 )
+MAX_ASSIGNMENTS = 50
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 
 
 def shared_words(text_a, text_b):
@@ -64,13 +72,47 @@ def highlight_shared_words(text, colors):
     return "".join(highlighted_text).replace("\n", "<br>")
 
 
+def paragraph_results_csv(results):
+    output = StringIO()
+    writer = csv.DictWriter(
+        output,
+        fieldnames=[
+            "paragraph_a",
+            "paragraph_b",
+            "similarity_percent",
+            "text_a",
+            "text_b",
+        ],
+    )
+    writer.writeheader()
+    for result in results:
+        writer.writerow({
+            "paragraph_a": result["paragraph_a"],
+            "paragraph_b": result["paragraph_b"],
+            "similarity_percent": round(result["similarity"] * 100, 2),
+            "text_a": result["text_a"],
+            "text_b": result["text_b"],
+        })
+    return output.getvalue()
+
+
 def sync_uploaded_file(uploaded_file, text_key, upload_key):
     if uploaded_file is None:
         st.session_state[text_key] = ""
         st.session_state[upload_key] = None
+        st.session_state.results = None
         return
 
     file_bytes = uploaded_file.getvalue()
+    if len(file_bytes) > MAX_FILE_SIZE_BYTES:
+        st.session_state[text_key] = ""
+        st.session_state[upload_key] = None
+        st.session_state.results = None
+        st.session_state.input_error = (
+            f"'{uploaded_file.name}' is larger than 10 MB."
+        )
+        return
+
     file_signature = hashlib.sha256(file_bytes).hexdigest()
 
     if st.session_state.get(upload_key) == file_signature:
@@ -80,6 +122,7 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key):
         st.session_state[text_key] = extract_text(uploaded_file)
         st.session_state[upload_key] = file_signature
         st.session_state.input_error = None
+        st.session_state.results = None
     except (
         UnicodeDecodeError,
         ValueError,
@@ -104,54 +147,127 @@ def compare_on_threshold_change():
         return
 
     st.session_state.input_error = None
-    st.session_state.results = compare_paragraphs(
-        assignment_a,
-        assignment_b
-    )
+    try:
+        st.session_state.results = compare_paragraphs(
+            assignment_a,
+            assignment_b
+        )
+    except ValueError as error:
+        st.session_state.results = None
+        st.session_state.input_error = str(error)
 
 
-st.set_page_config(
-    page_title="Assignment Similarity Checker",
-    page_icon="📄",
-    layout="wide"
-)
-
-st.title("Assignment Similarity and Citation Checker")
-
-st.write(
-    "Compare two assignments and identify passages "
-    "that may require closer review."
-)
-
-if "results" not in st.session_state:
-    st.session_state.results = None
-if "similarity_threshold" not in st.session_state:
-    st.session_state.similarity_threshold = 20
-if "input_error" not in st.session_state:
-    st.session_state.input_error = None
+def collection_signature(uploaded_files):
+    digest = hashlib.sha256()
+    for uploaded_file in sorted(uploaded_files, key=lambda file: file.name):
+        digest.update(uploaded_file.name.encode("utf-8"))
+        digest.update(uploaded_file.getvalue())
+    return digest.hexdigest()
 
 
-col1, col2 = st.columns(2)
+def unique_document_name(name, existing_names):
+    if name not in existing_names:
+        return name
 
-with col1:
-    uploaded_a = st.file_uploader(
-        "Upload Assignment A",
-        type=SUPPORTED_FILE_TYPES,
-        key="uploaded_assignment_a",
-        help="Supported formats: TXT, PDF, and DOCX.",
-    )
+    stem, separator, extension = name.rpartition(".")
+    if not separator:
+        stem, extension = name, ""
+
+    index = 2
+    candidate = name
+    while candidate in existing_names:
+        suffix = f" ({index})"
+        candidate = f"{stem}{suffix}"
+        if extension:
+            candidate = f"{candidate}.{extension}"
+        index += 1
+    return candidate
+
+
+def extract_documents(uploaded_files):
+    documents = {}
+    errors = []
+
+    for uploaded_file in uploaded_files:
+        name = unique_document_name(uploaded_file.name, documents)
+        if uploaded_file.size > MAX_FILE_SIZE_BYTES:
+            errors.append(f"{uploaded_file.name}: file is larger than 10 MB.")
+            continue
+        try:
+            text = extract_text(uploaded_file)
+        except (
+            UnicodeDecodeError,
+            ValueError,
+            OSError,
+            PdfReadError,
+            PackageNotFoundError,
+        ) as error:
+            errors.append(f"{uploaded_file.name}: {error}")
+            continue
+
+        if not text.strip():
+            errors.append(
+                f"{uploaded_file.name}: no readable text was found."
+            )
+            continue
+
+        documents[name] = text
+
+    return documents, errors
+
+
+def clear_collection_results():
+    st.session_state.collection_signature = None
+    st.session_state.collection_documents = {}
+    st.session_state.collection_matrix = None
+    st.session_state.collection_pairs = None
+    st.session_state.collection_errors = []
+
+
+def render_pair_content(match, threshold):
+    assignment_col, comparison_col = st.columns(2)
+
+    with assignment_col:
+        st.markdown("**Assignment A**")
+    with comparison_col:
+        st.markdown("**Assignment B**")
+
+    if threshold < 50:
+        colors = word_colors(
+            shared_words(match["text_a"], match["text_b"])
+        )
+        with assignment_col:
+            st.markdown(
+                highlight_shared_words(match["text_a"], colors),
+                unsafe_allow_html=True
+            )
+        with comparison_col:
+            st.markdown(
+                highlight_shared_words(match["text_b"], colors),
+                unsafe_allow_html=True
+            )
+    else:
+        with assignment_col:
+            st.write(match["text_a"])
+        with comparison_col:
+            st.write(match["text_b"])
+
+
+def render_pair_result(match, threshold):
+    with st.expander(
+        f"Paragraph A{match['paragraph_a']} - "
+        f"Paragraph B{match['paragraph_b']} - "
+        f"{match['similarity'] * 100:.1f}%"
+    ):
+        render_pair_content(match, threshold)
+
+
+def render_two_assignment_mode(uploaded_files):
+    uploaded_a, uploaded_b = uploaded_files
     sync_uploaded_file(
         uploaded_a,
         "assignment_a",
         "assignment_a_upload_signature",
-    )
-
-with col2:
-    uploaded_b = st.file_uploader(
-        "Upload Assignment B",
-        type=SUPPORTED_FILE_TYPES,
-        key="uploaded_assignment_b",
-        help="Supported formats: TXT, PDF, and DOCX.",
     )
     sync_uploaded_file(
         uploaded_b,
@@ -159,80 +275,210 @@ with col2:
         "assignment_b_upload_signature",
     )
 
-both_assignments_uploaded = bool(
-    uploaded_a
-    and uploaded_b
-    and st.session_state.assignment_a.strip()
-    and st.session_state.assignment_b.strip()
-)
+    both_uploaded = bool(
+        st.session_state.assignment_a.strip()
+        and st.session_state.assignment_b.strip()
+    )
+    if not both_uploaded:
+        if st.session_state.input_error:
+            st.error(st.session_state.input_error)
+        return
 
-if both_assignments_uploaded:
-    st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
+    st.caption(
+        f"Assignment A: {len(st.session_state.assignment_a):,} characters · "
+        f"Assignment B: {len(st.session_state.assignment_b):,} characters"
+    )
+
+    if st.button("Compare assignments", type="primary", key="compare_two"):
+        compare_on_threshold_change()
 
     threshold = st.slider(
         "Minimum similarity to display",
         min_value=0,
         max_value=100,
         key="similarity_threshold",
-        on_change=compare_on_threshold_change
     )
 
-    if st.session_state.results is not None:
-        st.subheader("Similar Paragraphs")
+    if st.session_state.results is None:
+        st.info("Click **Compare assignments** to calculate the comparison.")
+        return
 
-        matches = [
-            result for result in st.session_state.results
-            if result["similarity"] * 100 >= threshold
-        ]
-
-        st.caption(
-            f"Showing {len(matches)} of {len(st.session_state.results)} "
-            f"paragraph pairs with similarity of at least {threshold}%."
+    matches = [
+        result for result in st.session_state.results
+        if result["similarity"] * 100 >= threshold
+    ]
+    st.subheader("Similar Paragraphs")
+    st.caption(
+        f"Showing {len(matches)} of {len(st.session_state.results)} "
+        f"paragraph pairs with similarity of at least {threshold}%."
+    )
+    if st.session_state.results:
+        st.download_button(
+            "Download paragraph results (CSV)",
+            data=paragraph_results_csv(st.session_state.results),
+            file_name="paragraph-similarity-results.csv",
+            mime="text/csv",
+            key="download_two_results",
         )
+    if not matches:
+        st.info("No paragraph pairs meet this threshold.")
+    for match in matches:
+        render_pair_result(match, threshold)
 
-        if not matches:
-            st.info("No paragraph pairs meet this threshold.")
 
-        for match in matches:
-            with st.expander(
-                f"Paragraph A{match['paragraph_a']} - "
-                f"Paragraph B{match['paragraph_b']} - "
-                f"{match['similarity'] * 100:.1f}%"
-            ):
-                assignment_col, comparison_col = st.columns(2)
+def render_collection_mode(uploaded_files):
+    signature = collection_signature(uploaded_files)
+    if signature != st.session_state.collection_signature:
+        documents, errors = extract_documents(uploaded_files)
+        st.session_state.collection_signature = signature
+        st.session_state.collection_documents = documents
+        st.session_state.collection_errors = errors
+        st.session_state.collection_matrix = None
+        st.session_state.collection_pairs = None
 
-                with assignment_col:
-                    st.markdown("**Assignment A**")
-                with comparison_col:
-                    st.markdown("**Assignment B**")
+    for error in st.session_state.collection_errors:
+        st.warning(error)
 
-                if threshold < 50:
-                    common_words = shared_words(
-                        match["text_a"],
-                        match["text_b"]
+    documents = st.session_state.collection_documents
+    if len(documents) < 2:
+        st.info("At least two valid assignments are required for comparison.")
+        return
+    if st.button("Compare assignments", type="primary"):
+        try:
+            matrix, pairs = compare_document_collection(documents)
+        except ValueError as error:
+            st.error(str(error))
+            st.session_state.collection_matrix = None
+            st.session_state.collection_pairs = None
+        else:
+            st.session_state.collection_matrix = matrix
+            st.session_state.collection_pairs = pairs
+
+    matrix = st.session_state.collection_matrix
+    pairs = st.session_state.collection_pairs
+    if matrix is None or pairs is None:
+        return
+
+    threshold = st.slider(
+        "Minimum similarity for displayed pairs (%)",
+        min_value=0,
+        max_value=100,
+        value=20,
+        key="collection_threshold",
+    )
+    above_threshold = pairs[pairs["similarity"] >= threshold]
+    metrics = st.columns(3)
+    metrics[0].metric("Assignments", len(matrix))
+    metrics[1].metric("Unique pairs", len(pairs))
+    metrics[2].metric("Pairs above threshold", len(above_threshold))
+    st.download_button(
+        "Download collection results (CSV)",
+        data=pairs.to_csv(index=False),
+        file_name="assignment-similarity-results.csv",
+        mime="text/csv",
+        key="download_collection_results",
+    )
+
+    st.subheader("Similarity matrix")
+    st.dataframe(
+        matrix.style.format("{:.1f}%").background_gradient(
+            cmap="RdYlGn",
+            vmin=0,
+            vmax=100,
+        ),
+        width="stretch",
+    )
+
+    st.subheader("Groups of similar assignments")
+    group_threshold = st.slider(
+        "Minimum similarity for a group connection (%)",
+        min_value=1,
+        max_value=100,
+        value=50,
+        key="group_threshold",
+    )
+    groups = find_similarity_groups(matrix, group_threshold)
+    if not groups:
+        st.info("No groups of two or more assignments meet this threshold.")
+    for index, group in enumerate(groups, start=1):
+        with st.expander(f"Group {index} — {len(group)} assignments"):
+            for document in group:
+                st.write(f"- {document}")
+
+    st.subheader("Most similar assignment pairs")
+    if above_threshold.empty:
+        st.info("No assignment pairs meet the selected threshold.")
+    for pair in above_threshold.itertuples(index=False):
+        with st.expander(
+            f"{pair.assignment_a} ↔ {pair.assignment_b} — "
+            f"{pair.similarity:.1f}%"
+        ):
+            try:
+                paragraph_results = compare_paragraphs(
+                    documents[pair.assignment_a],
+                    documents[pair.assignment_b],
+                )
+            except ValueError as error:
+                st.warning(f"Paragraph comparison is unavailable: {error}")
+                continue
+            for result in paragraph_results[:10]:
+                with st.expander(
+                    f"Paragraph {result['paragraph_a']} ↔ "
+                    f"{result['paragraph_b']} — "
+                    f"{result['similarity'] * 100:.1f}%"
+                ):
+                    render_pair_content(
+                        result,
+                        threshold=49 if threshold < 50 else 50,
                     )
-                    colors = word_colors(common_words)
-                    with assignment_col:
-                        st.markdown(
-                            highlight_shared_words(
-                                match["text_a"],
-                                colors
-                            ),
-                            unsafe_allow_html=True
-                        )
-                    with comparison_col:
-                        st.markdown(
-                            highlight_shared_words(
-                                match["text_b"],
-                                colors
-                            ),
-                            unsafe_allow_html=True
-                        )
-                else:
-                    with assignment_col:
-                        st.write(match["text_a"])
-                    with comparison_col:
-                        st.write(match["text_b"])
 
-elif st.session_state.input_error:
-    st.error(st.session_state.input_error)
+
+st.set_page_config(
+    page_title="Assignment Similarity Checker",
+    page_icon="📚",
+    layout="wide"
+)
+
+st.title("Assignment Similarity Checker")
+st.write(
+    "Compare two assignments or analyze a collection of assignments. "
+    "Similarity scores are not a probability of plagiarism."
+)
+
+for key, default in (
+    ("results", None),
+    ("similarity_threshold", 20),
+    ("input_error", None),
+    ("collection_signature", None),
+    ("collection_documents", {}),
+    ("collection_matrix", None),
+    ("collection_pairs", None),
+    ("collection_errors", []),
+):
+    if key not in st.session_state:
+        st.session_state[key] = default
+
+uploaded_files = st.file_uploader(
+    "Upload assignments",
+    type=SUPPORTED_FILE_TYPES,
+    accept_multiple_files=True,
+    key="assignment_uploads",
+    help=(
+        "Upload exactly 2 files for paragraph comparison, or 3–50 files "
+        "for collection analysis. Supported formats: TXT, PDF, and DOCX."
+    ),
+)
+
+if len(uploaded_files) > MAX_ASSIGNMENTS:
+    st.error("Please upload no more than 50 assignments.")
+    clear_collection_results()
+elif len(uploaded_files) < 2:
+    clear_collection_results()
+    st.info(
+        "Upload exactly 2 files for a detailed comparison, or at least 3 "
+        "files to analyze a collection."
+    )
+elif len(uploaded_files) == 2:
+    render_two_assignment_mode(uploaded_files)
+else:
+    render_collection_mode(uploaded_files)

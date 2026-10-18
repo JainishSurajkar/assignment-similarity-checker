@@ -5,9 +5,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 def split_paragraph(text):
     return [
         paragraph.strip()
-        for paragraph in text.split("\n\n")
+        for paragraph in text.replace("\r\n", "\n").split("\n\n")
         if paragraph.strip()
     ]
+
 
 def compare_paragraphs(text_a, text_b):
     paragraph_a = split_paragraph(text_a)
@@ -19,7 +20,13 @@ def compare_paragraphs(text_a, text_b):
     all_paragraphs = paragraph_a + paragraph_b
 
     vectorizer = TfidfVectorizer()
-    vectors = vectorizer.fit_transform(all_paragraphs)
+    try:
+        vectors = vectorizer.fit_transform(all_paragraphs)
+    except ValueError as error:
+        raise ValueError(
+            "The assignments do not contain enough readable words "
+            "to calculate similarity."
+        ) from error
 
     count_a = len(paragraph_a)
     similarity_matrix = cosine_similarity(
