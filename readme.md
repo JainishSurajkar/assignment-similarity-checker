@@ -21,6 +21,10 @@ paragraph and identifies pairs and groups with similar content.
 - Analyze a collection of 2 to 50 assignments in the collection analyzer.
 - Display a document-level similarity matrix and ranked assignment pairs.
 - Discover connected groups of assignments above a selected threshold.
+- Discover hierarchical clusters with explanatory keywords and internal
+  similarity summaries.
+- Compare lexical TF-IDF similarity with semantic sentence-embedding
+  similarity for two assignments.
 
 ## Requirements
 
@@ -75,11 +79,36 @@ The application compares every paragraph in Assignment A with every paragraph
 in Assignment B. A higher threshold displays only paragraph pairs with higher
 similarity scores.
 
+### Lexical versus semantic comparison
+
+With exactly two uploaded files, click **Compare lexical and semantic
+similarity** to calculate both scores for the same paragraph pairs. Lexical
+similarity uses TF-IDF and shared word patterns. Semantic similarity uses the
+`sentence-transformers/all-MiniLM-L6-v2` embedding model to estimate
+meaning-related similarity.
+
+The first semantic comparison downloads the model and may take longer. Use the
+two thresholds to filter pairs meeting either criterion. A positive semantic
+minus lexical difference can indicate related wording with different
+vocabulary; it is not evidence of plagiarism.
+
+The semantic method is a practical baseline, not a guarantee of better
+plagiarism detection. It can recognize paraphrases that share fewer words,
+while TF-IDF remains more interpretable and often stronger for near-identical
+copying. The embedding model may truncate very long paragraphs, so paragraph
+length and domain should be considered when interpreting results.
+
 ### Collection analysis
 
 When three or more files are uploaded, the app displays the similarity matrix,
 summary metrics, ranked pairs, and connected groups automatically after
 **Compare assignments** is clicked.
+
+The **Clustering and pattern discovery** section uses average-linkage
+hierarchical clustering with cosine distance. Choose a clustering similarity
+setting and click **Discover assignment clusters** to view cluster sizes,
+member assignments, important TF-IDF words and phrases, average internal
+similarity, and each assignment's closest cluster member.
 
 ## Supported files
 
@@ -102,6 +131,12 @@ uploading them.
 4. Results are sorted from the highest similarity score to the lowest.
 5. The selected threshold filters the displayed results.
 
+For collection clustering, TF-IDF uses English stop-word removal and unigrams
+plus bigrams. Cosine similarity is converted to cosine distance
+(`1 - similarity`) and grouped with average-linkage agglomerative clustering.
+The clustering setting controls where the hierarchy is cut; it does not prove
+that every pair inside a cluster meets the selected percentage.
+
 When highlighting is enabled, shared words are matched case-insensitively.
 Each shared word receives a deterministic color, and that same color is used
 for the word in both assignments.
@@ -113,6 +148,8 @@ assignment-similarity-checker/
 ├── src/
 │   ├── app.py                 # Streamlit user interface
 │   ├── collection_similarity.py # Collection similarity and grouping
+│   ├── cluster_analysis.py    # Hierarchical clustering and summaries
+│   ├── lexical_semantic.py    # Lexical and embedding-based comparison
 │   ├── file_extraction.py    # TXT, PDF, and DOCX text extraction
 │   ├── similarity.py          # Paragraph splitting and similarity calculation
 │   └── text_preprocessing.py # Additional preprocessing examples/utilities

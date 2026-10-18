@@ -6,11 +6,13 @@ import csv
 
 import streamlit as st
 from docx.opc.exceptions import PackageNotFoundError
+from cluster_analysis import cluster_documents
 from collection_similarity import (
     compare_document_collection,
     find_similarity_groups,
 )
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
+from lexical_semantic import compare_lexical_and_semantic
 from pypdf.errors import PdfReadError
 from similarity import compare_paragraphs
 
@@ -96,6 +98,10 @@ def paragraph_results_csv(results):
     return output.getvalue()
 
 
+def lexical_semantic_csv(results):
+    return results.to_csv(index=False)
+
+
 def sync_uploaded_file(uploaded_file, text_key, upload_key):
     if uploaded_file is None:
         st.session_state[text_key] = ""
@@ -123,6 +129,7 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key):
         st.session_state[upload_key] = file_signature
         st.session_state.input_error = None
         st.session_state.results = None
+        clear_semantic_results()
     except (
         UnicodeDecodeError,
         ValueError,
@@ -133,6 +140,7 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key):
         st.session_state[text_key] = ""
         st.session_state[upload_key] = file_signature
         st.session_state.input_error = str(error)
+        clear_semantic_results()
 
 
 def compare_on_threshold_change():
@@ -222,6 +230,15 @@ def clear_collection_results():
     st.session_state.collection_matrix = None
     st.session_state.collection_pairs = None
     st.session_state.collection_errors = []
+    st.session_state.cluster_assignments = None
+    st.session_state.cluster_summary = None
+    st.session_state.cluster_similarity_matrix = None
+    st.session_state.cluster_input_signature = None
+
+
+def clear_semantic_results():
+    st.session_state.lexical_semantic_results = None
+    st.session_state.lexical_semantic_signature = None
 
 
 def render_pair_content(match, threshold):
@@ -325,6 +342,86 @@ def render_two_assignment_mode(uploaded_files):
     for match in matches:
         render_pair_result(match, threshold)
 
+    st.subheader("Lexical vs semantic comparison")
+    st.write(
+        "TF-IDF measures shared wording, while sentence embeddings estimate "
+        "meaning-related similarity. The first run downloads the embedding "
+        "model and may take longer."
+    )
+    semantic_signature = collection_signature(uploaded_files)
+    if st.button(
+        "Compare lexical and semantic similarity",
+        type="secondary",
+        key="compare_semantic",
+    ):
+        with st.spinner("Loading the semantic model and comparing paragraphs..."):
+            try:
+                st.session_state.lexical_semantic_results = (
+                    compare_lexical_and_semantic(
+                        st.session_state.assignment_a,
+                        st.session_state.assignment_b,
+                    )
+                )
+                st.session_state.lexical_semantic_signature = semantic_signature
+            except (ValueError, OSError, RuntimeError) as error:
+                st.session_state.lexical_semantic_results = None
+                st.error(f"Semantic comparison failed: {error}")
+
+    semantic_results = st.session_state.lexical_semantic_results
+    if (
+        semantic_results is not None
+        and st.session_state.lexical_semantic_signature == semantic_signature
+    ):
+        lexical_threshold = st.slider(
+            "Minimum lexical similarity (%)",
+            min_value=0,
+            max_value=100,
+            value=20,
+            key="lexical_threshold",
+        )
+        semantic_threshold = st.slider(
+            "Minimum semantic similarity (%)",
+            min_value=0,
+            max_value=100,
+            value=50,
+            key="semantic_threshold",
+        )
+        semantic_matches = semantic_results[
+            (semantic_results["lexical_similarity"] >= lexical_threshold)
+            | (semantic_results["semantic_similarity"] >= semantic_threshold)
+        ]
+        st.caption(
+            f"Showing {len(semantic_matches)} of {len(semantic_results)} "
+            "paragraph pairs meeting at least one selected threshold."
+        )
+        st.download_button(
+            "Download lexical/semantic results (CSV)",
+            data=lexical_semantic_csv(semantic_results),
+            file_name="lexical-semantic-results.csv",
+            mime="text/csv",
+            key="download_semantic_results",
+        )
+        for result in semantic_matches.itertuples(index=False):
+            with st.expander(
+                f"Paragraph A{result.paragraph_a} ↔ "
+                f"B{result.paragraph_b} — "
+                f"lexical {result.lexical_similarity:.1f}% · "
+                f"semantic {result.semantic_similarity:.1f}%"
+            ):
+                st.write(
+                    f"Semantic minus lexical difference: "
+                    f"{result.difference:+.1f} percentage points."
+                )
+                render_pair_content(
+                    {
+                        "text_a": result.text_a,
+                        "text_b": result.text_b,
+                    },
+                    threshold=49,
+                )
+    elif semantic_results is not None:
+        st.info("The uploaded assignments changed. Run the semantic comparison again.")
+
 
 def render_collection_mode(uploaded_files):
     signature = collection_signature(uploaded_files)
@@ -335,6 +432,10 @@ def render_collection_mode(uploaded_files):
         st.session_state.collection_errors = errors
         st.session_state.collection_matrix = None
         st.session_state.collection_pairs = None
+        st.session_state.cluster_assignments = None
+        st.session_state.cluster_summary = None
+        st.session_state.cluster_similarity_matrix = None
+        st.session_state.cluster_input_signature = None
 
     for error in st.session_state.collection_errors:
         st.warning(error)
@@ -432,6 +533,61 @@ def render_collection_mode(uploaded_files):
                         threshold=49 if threshold < 50 else 50,
                     )
 
+    st.subheader("Clustering and pattern discovery")
+    st.write(
+        "Group assignments with similar text patterns using hierarchical "
+        "clustering. Cluster membership is an investigation aid, not proof "
+        "of plagiarism."
+    )
+    cluster_threshold = st.slider(
+        "Clustering similarity setting (%)",
+        min_value=10,
+        max_value=90,
+        value=55,
+        step=5,
+        help=(
+            "A higher setting generally creates smaller, stricter groups. "
+            "This is an average-linkage distance setting and is not a "
+            "guaranteed minimum for every pair in a cluster."
+        ),
+        key="cluster_threshold",
+    )
+    if st.button("Discover assignment clusters", type="primary"):
+        try:
+            assignments, summary, similarity_matrix = cluster_documents(
+                documents,
+                similarity_threshold=cluster_threshold,
+            )
+        except ValueError as error:
+            st.error(str(error))
+        else:
+            st.session_state.cluster_assignments = assignments
+            st.session_state.cluster_summary = summary
+            st.session_state.cluster_similarity_matrix = similarity_matrix
+            st.session_state.cluster_input_signature = (
+                st.session_state.collection_signature
+            )
+
+    if (
+        st.session_state.cluster_summary is not None
+        and st.session_state.cluster_input_signature
+        == st.session_state.collection_signature
+    ):
+        st.subheader("Cluster overview")
+        st.dataframe(
+            st.session_state.cluster_summary,
+            hide_index=True,
+            width="stretch",
+        )
+        st.subheader("Assignments by cluster")
+        st.dataframe(
+            st.session_state.cluster_assignments,
+            hide_index=True,
+            width="stretch",
+        )
+    elif st.session_state.cluster_summary is not None:
+        st.info("The uploaded assignments changed. Run clustering again.")
+
 
 st.set_page_config(
     page_title="Assignment Similarity Checker",
@@ -454,6 +610,12 @@ for key, default in (
     ("collection_matrix", None),
     ("collection_pairs", None),
     ("collection_errors", []),
+    ("cluster_assignments", None),
+    ("cluster_summary", None),
+    ("cluster_similarity_matrix", None),
+    ("cluster_input_signature", None),
+    ("lexical_semantic_results", None),
+    ("lexical_semantic_signature", None),
 ):
     if key not in st.session_state:
         st.session_state[key] = default
