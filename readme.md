@@ -9,6 +9,7 @@ A Streamlit application that compares two assignments paragraph by paragraph and
 - Split assignments into paragraphs using blank lines.
 - Calculate paragraph similarity with TF-IDF and cosine similarity.
 - Choose a minimum similarity threshold from `0%` to `100%`.
+- Highlight shared words when the threshold is below `50%`.
 - Automatically update the results when the threshold slider changes.
 - Expand each result to view the compared paragraphs and similarity score.
 

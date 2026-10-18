@@ -1,10 +1,67 @@
 import hashlib
+import html
+import re
 
 import streamlit as st
 from docx.opc.exceptions import PackageNotFoundError
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
 from pypdf.errors import PdfReadError
 from similarity import compare_paragraphs
+
+
+WORD_PATTERN = re.compile(r"(?u)\b\w\w+\b")
+HIGHLIGHT_COLORS = (
+    "#ffd6a5",
+    "#fdffb6",
+    "#caffbf",
+    "#9bf6ff",
+    "#bdb2ff",
+    "#ffc6ff",
+    "#a0c4ff",
+    "#f1c0e8",
+)
+
+
+def shared_words(text_a, text_b):
+    words_a = {
+        word.casefold()
+        for word in WORD_PATTERN.findall(text_a)
+    }
+    words_b = {
+        word.casefold()
+        for word in WORD_PATTERN.findall(text_b)
+    }
+    return words_a & words_b
+
+
+def word_colors(words):
+    return {
+        word: HIGHLIGHT_COLORS[index % len(HIGHLIGHT_COLORS)]
+        for index, word in enumerate(sorted(words))
+    }
+
+
+def highlight_shared_words(text, colors):
+    highlighted_text = []
+    last_end = 0
+
+    for match in WORD_PATTERN.finditer(text):
+        highlighted_text.append(html.escape(text[last_end:match.start()]))
+
+        color = colors.get(match.group().casefold())
+        if color:
+            highlighted_text.append(
+                f"<mark style='background-color: {color}; "
+                "padding: 0 2px; border-radius: 3px;'>"
+                f"{html.escape(match.group())}</mark>"
+            )
+        else:
+            highlighted_text.append(html.escape(match.group()))
+
+        last_end = match.end()
+
+    highlighted_text.append(html.escape(text[last_end:]))
+    return "".join(highlighted_text).replace("\n", "<br>")
 
 
 def sync_uploaded_file(uploaded_file, text_key, upload_key):
@@ -142,11 +199,40 @@ if both_assignments_uploaded:
                 f"Paragraph B{match['paragraph_b']} - "
                 f"{match['similarity'] * 100:.1f}%"
             ):
-                st.markdown("**Assignment A**")
-                st.write(match["text_a"])
+                assignment_col, comparison_col = st.columns(2)
 
-                st.markdown("**Assignment B**")
-                st.write(match["text_b"])
+                with assignment_col:
+                    st.markdown("**Assignment A**")
+                with comparison_col:
+                    st.markdown("**Assignment B**")
+
+                if threshold < 50:
+                    common_words = shared_words(
+                        match["text_a"],
+                        match["text_b"]
+                    )
+                    colors = word_colors(common_words)
+                    with assignment_col:
+                        st.markdown(
+                            highlight_shared_words(
+                                match["text_a"],
+                                colors
+                            ),
+                            unsafe_allow_html=True
+                        )
+                    with comparison_col:
+                        st.markdown(
+                            highlight_shared_words(
+                                match["text_b"],
+                                colors
+                            ),
+                            unsafe_allow_html=True
+                        )
+                else:
+                    with assignment_col:
+                        st.write(match["text_a"])
+                    with comparison_col:
+                        st.write(match["text_b"])
 
 elif st.session_state.input_error:
     st.error(st.session_state.input_error)
