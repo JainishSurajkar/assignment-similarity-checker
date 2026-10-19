@@ -3,6 +3,10 @@
 A Streamlit application that compares uploaded assignments paragraph by
 paragraph and identifies pairs and groups with similar content.
 
+Upload TXT, PDF, or DOCX files, inspect lexical and semantic similarity, and
+prioritize passages for human review. Similarity scores are not plagiarism
+probabilities or disciplinary decisions.
+
 ## Features
 
 - Use one upload area for both pair comparison and collection analysis.
@@ -90,7 +94,8 @@ With exactly two uploaded files, click **Compare lexical and semantic
 similarity** to calculate both scores for the same paragraph pairs. Lexical
 similarity uses TF-IDF and shared word patterns. Semantic similarity uses the
 `sentence-transformers/all-MiniLM-L6-v2` embedding model to estimate
-meaning-related similarity.
+meaning-related similarity. It reports a scaled semantic cosine score from
+-100 to 100, not a calibrated probability of copying.
 
 The first semantic comparison downloads the model and may take longer. Use the
 two thresholds to filter pairs meeting either criterion. A positive semantic
@@ -128,7 +133,8 @@ metrics should not be presented as final performance results.
 
 When three or more files are uploaded, the app displays the similarity matrix,
 summary metrics, ranked pairs, and connected groups automatically after
-**Compare assignments** is clicked.
+**Compare assignments** is clicked. Detailed paragraph comparison is calculated
+only for the selected ranked pair, avoiding work for every possible pair.
 
 The **Clustering and pattern discovery** section uses average-linkage
 hierarchical clustering with cosine distance. Choose a clustering similarity
@@ -168,6 +174,49 @@ When highlighting is enabled, shared words are matched case-insensitively.
 Each shared word receives a deterministic color, and that same color is used
 for the word in both assignments.
 
+## How it works
+
+1. Text is extracted and checked for readable content.
+2. With two files, TF-IDF ranks every cross-assignment paragraph pair.
+3. With three or more files, complete-document TF-IDF produces a matrix and
+   ranked assignment pairs.
+4. Optional sentence embeddings provide a separate semantic comparison for two
+   files.
+5. The interface filters and explains results for human review.
+
+### Score glossary and limitations
+
+- **TF-IDF cosine similarity (%)** measures weighted vocabulary overlap.
+- **Scaled semantic cosine score (%)** is normalized-embedding cosine
+  similarity multiplied by 100; negative values are possible and it is not a
+  probability.
+- **Threshold** is a display filter and does not recalculate the comparison.
+- **Shared-word highlighting** marks common individual words, not copied
+  phrases.
+
+Common teaching material, prompts, citations, and legitimate collaboration can
+create similarity. Scanned PDFs require OCR, which this project does not
+implement.
+
+## Screenshots
+
+Capture real application screenshots under `docs/screenshots/` before a
+release. Recommended views are the two-file comparison, highlighted
+paragraphs, collection matrix, clustering summary, and semantic comparison.
+The repository does not include fabricated screenshots.
+
+## Testing
+
+Run the automated tests from the project root:
+
+```powershell
+pytest
+```
+
+The tests cover extraction validation, paragraph splitting and scoring,
+collection grouping, singleton cluster summaries, and training-only lexical
+vectorizer fitting.
+
 ## Project structure
 
 ```text
@@ -192,11 +241,14 @@ assignment-similarity-checker/
 ## Notes
 
 - With two files, the slider and results are hidden until both assignments
-  contain extractable text.
+  contain extractable text; results appear after **Compare assignments**.
 - With three or more files, collection results appear after at least two valid
   files remain and **Compare assignments** is clicked.
 - Empty or unreadable assignments are not compared.
 - Similarity scores are displayed as percentages.
 - Individual uploads are limited to 10 MB.
 - Collection results can be downloaded as a CSV file.
+- The evaluation starter dataset contains 60 labelled examples across
+  train/validation/test splits and should continue to grow with manually
+  reviewed domain-specific pairs.
 - The `.venv` directory is ignored and should not be committed to Git.

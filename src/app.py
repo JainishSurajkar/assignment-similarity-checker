@@ -12,7 +12,10 @@ from collection_similarity import (
     find_similarity_groups,
 )
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
-from lexical_semantic import compare_lexical_and_semantic
+from lexical_semantic import (
+    SemanticDependencyError,
+    compare_lexical_and_semantic,
+)
 from pypdf.errors import FileNotDecryptedError, PdfReadError
 from similarity import compare_paragraphs
 
@@ -384,8 +387,9 @@ def render_two_assignment_mode(uploaded_files):
     st.subheader("Lexical vs semantic comparison")
     st.write(
         "TF-IDF measures shared wording, while sentence embeddings estimate "
-        "meaning-related similarity. The first run downloads the embedding "
-        "model and may take longer."
+        "meaning-related similarity. The semantic value is a scaled cosine "
+        "score, not a probability of plagiarism. The first run downloads the "
+        "embedding model and may take longer."
     )
     semantic_signature = collection_signature(uploaded_files)
     if st.button(
@@ -402,7 +406,12 @@ def render_two_assignment_mode(uploaded_files):
                     )
                 )
                 st.session_state.lexical_semantic_signature = semantic_signature
-            except (ValueError, OSError, RuntimeError) as error:
+            except (
+                ValueError,
+                OSError,
+                SemanticDependencyError,
+                RuntimeError,
+            ) as error:
                 st.session_state.lexical_semantic_results = None
                 st.error(f"Semantic comparison failed: {error}")
 
@@ -419,8 +428,8 @@ def render_two_assignment_mode(uploaded_files):
             key="lexical_threshold",
         )
         semantic_threshold = st.slider(
-            "Minimum semantic similarity (%)",
-            min_value=0,
+            "Minimum scaled semantic cosine score (%)",
+            min_value=-100,
             max_value=100,
             value=50,
             key="semantic_threshold",
@@ -556,19 +565,33 @@ def render_collection_mode(uploaded_files):
     st.subheader("Most similar assignment pairs")
     if above_threshold.empty:
         st.info("No assignment pairs meet the selected threshold.")
-    for pair in above_threshold.itertuples(index=False):
-        with st.expander(
+    else:
+        ranked_options = above_threshold.head(100)
+        pair_labels = [
             f"{pair.assignment_a} ↔ {pair.assignment_b} — "
             f"{pair.similarity:.1f}%"
-        ):
-            try:
-                paragraph_results = compare_paragraphs(
-                    documents[pair.assignment_a],
-                    documents[pair.assignment_b],
-                )
-            except ValueError as error:
-                st.warning(f"Paragraph comparison is unavailable: {error}")
-                continue
+            for pair in ranked_options.itertuples(index=False)
+        ]
+        selected_label = st.selectbox(
+            "Select one assignment pair for paragraph inspection",
+            pair_labels,
+            key="selected_collection_pair",
+        )
+        selected_index = pair_labels.index(selected_label)
+        pair = ranked_options.iloc[selected_index]
+        st.caption(
+            f"Showing the top {len(ranked_options)} ranked pairs for selection. "
+            "Detailed paragraph comparison is calculated only for the "
+            "selected pair."
+        )
+        try:
+            paragraph_results = compare_paragraphs(
+                documents[pair["assignment_a"]],
+                documents[pair["assignment_b"]],
+            )
+        except ValueError as error:
+            st.warning(f"Paragraph comparison is unavailable: {error}")
+        else:
             for result in paragraph_results[:10]:
                 with st.expander(
                     f"Paragraph {result['paragraph_a']} ↔ "

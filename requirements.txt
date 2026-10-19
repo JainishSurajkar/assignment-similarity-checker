@@ -6,3 +6,4 @@ pypdf
 python-docx
 matplotlib
 sentence-transformers
+pytest

@@ -1,7 +1,6 @@
 from functools import lru_cache
 
 import pandas as pd
-from sentence_transformers import SentenceTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -11,9 +10,21 @@ from similarity import split_paragraph
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 
+class SemanticDependencyError(RuntimeError):
+    """Raised when optional semantic-model dependencies are unavailable."""
+
+
 @lru_cache(maxsize=1)
 def load_semantic_model():
     """Load the embedding model once per Python process."""
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError as error:
+        raise SemanticDependencyError(
+            "Semantic comparison requires the 'sentence-transformers' "
+            "package. Install dependencies with: pip install -r "
+            "requirements.txt"
+        ) from error
     return SentenceTransformer(MODEL_NAME)
 
 

@@ -5,3 +5,57 @@ P03,Photosynthesis converts light energy into chemical energy.,Photosynthesis co
 P04,A database stores organized information.,A bicycle has two wheels and pedals.,0,Unrelated content,validation
 P05,The algorithm uses training examples to predict outcomes.,Training data helps a model make predictions.,1,Close paraphrase,test
 P06,The heart pumps blood through the body.,The water cycle includes evaporation and rainfall.,0,Unrelated content,test
+P07,Machine learning models learn patterns from examples.,Algorithms identify regularities in training data.,1,Close paraphrase,train
+P08,Classification assigns labels to new observations.,Regression predicts a numeric value.,0,Different tasks,train
+P09,Normalization scales numeric variables to a common range.,Scaling features places values on comparable ranges.,1,Close paraphrase,train
+P10,A primary key uniquely identifies a database row.,A foreign key links one table to another.,0,Different database concepts,train
+P11,Encryption protects information by transforming it with a key.,Cryptography converts readable data into protected ciphertext.,1,Close paraphrase,train
+P12,Sorting arranges records according to an ordering rule.,A queue processes items in last-in first-out order.,0,Different concepts,train
+P13,An operating system manages hardware and software resources.,The operating system controls access to computer resources.,1,Close paraphrase,train
+P14,An array stores elements at indexed positions.,A linked list stores nodes connected by references.,0,Different data structures,train
+P15,The sample mean estimates the average of a population.,A mean calculated from a sample can estimate population average.,1,Close paraphrase,train
+P16,Photosynthesis occurs in plant cells.,Respiration releases energy from nutrients.,0,Different biological processes,train
+P17,An API defines how software components communicate.,Application programming interfaces specify communication rules between programs.,1,Close paraphrase,train
+P18,Cloud storage keeps files on remote servers.,A local hard drive stores files inside the computer.,0,Contrasting locations,train
+P19,The compiler translates source code into machine instructions.,Compilers convert programs written in source code to executable instructions.,1,Close paraphrase,train
+P20,A histogram displays the distribution of numerical data.,A scatter plot shows the relationship between two variables.,0,Different visualizations,train
+P21,Version control records changes to files over time.,A version control system tracks the history of project files.,1,Close paraphrase,train
+P22,An IP address identifies a device on a network.,A URL identifies the location of a web resource.,0,Different identifiers,train
+P23,Precision is the proportion of predicted positives that are correct.,Precision measures correct positive predictions among all positive predictions.,1,Close paraphrase,train
+P24,The CPU executes instructions.,The monitor displays visual output.,0,Different hardware roles,train
+P25,Recursion solves a problem by calling the same function again.,A recursive function invokes itself on a smaller version of the problem.,1,Close paraphrase,train
+P26,Evaporation changes liquid water into vapor.,Condensation changes gas into liquid droplets.,0,Different water-cycle stages,train
+P27,Indexes speed up database searches.,A database index improves lookup performance for stored records.,1,Close paraphrase,train
+P28,The user interface is the visible part of an application.,The database schema describes tables and relationships.,0,Different layers,train
+P29,Overfitting occurs when a model memorizes training examples.,A model overfits when it learns training noise instead of general patterns.,1,Close paraphrase,train
+P30,An electric circuit needs a closed path for current.,A circuit with an open switch cannot carry continuous current.,0,Contrasting circuit conditions,train
+P31,Exact duplicate text should receive an overlap label.,The same passage copied without changes is substantial overlap.,1,Exact match,train
+P32,Random sampling gives each population member a selection chance.,Convenience sampling selects the easiest available participants.,0,Different sampling methods,train
+P33,The browser requests resources from a web server.,A web client asks a server for the requested resource.,1,Close paraphrase,train
+P34,Photosynthesis uses light to make chemical energy.,Gravity causes objects to accelerate toward Earth.,0,Unrelated claims,train
+P35,An algorithm is a finite sequence of instructions.,A procedure can describe ordered steps for solving a problem.,1,Close paraphrase,train
+P36,The validation set helps choose model settings.,The test set should estimate performance after choices are finalized.,0,Different evaluation roles,train
+P37,Data cleaning removes errors and inconsistent values.,Cleaning a dataset prepares it by correcting invalid entries.,1,Close paraphrase,train
+P38,A firewall filters network traffic.,A compiler translates source code.,0,Unrelated functions,train
+P39,The median is the middle value after sorting data.,The median identifies the central observation in ordered data.,1,Close paraphrase,train
+P40,An object contains state and behavior.,A function is a reusable block of instructions.,0,Different programming concepts,train
+P41,Text tokenization splits language into smaller units.,Tokenization breaks a document into words or subword pieces.,1,Close paraphrase,validation
+P42,Recall measures how many actual positives were found.,Specificity measures how many actual negatives were correctly rejected.,0,Different metrics,validation
+P43,A neural network contains connected computational units.,Neural models use layers of connected artificial neurons.,1,Close paraphrase,validation
+P44,A checksum detects accidental data changes.,A password manager stores credentials securely.,0,Unrelated purposes,validation
+P45,The water cycle moves water through Earth systems.,"Water circulates between the atmosphere, land, and oceans.",1,Close paraphrase,validation
+P46,An HTTP status code reports a request result.,A database transaction groups related operations.,0,Different systems,validation
+P47,The cosine score compares the direction of two vectors.,Cosine similarity measures the angle-based similarity of vectors.,1,Close paraphrase,validation
+P48,A cache stores frequently used data temporarily.,A compiler checks and translates program code.,0,Unrelated functions,validation
+P49,The model predicts labels for unseen examples.,A trained classifier assigns categories to new observations.,1,Close paraphrase,validation
+P50,A binary tree has nodes with at most two children.,A queue removes the item that arrived first.,0,Different data structures,validation
+P51,The method compares documents using word frequencies.,The approach measures document similarity from term frequency features.,1,Close paraphrase,test
+P52,An audit log records important system events.,A stylesheet controls the visual appearance of a webpage.,0,Unrelated concepts,test
+P53,Mean squared error averages squared prediction differences.,MSE summarizes prediction error by averaging squared residuals.,1,Close paraphrase,test
+P54,A socket enables network communication between processes.,A spreadsheet organizes values in rows and columns.,0,Unrelated concepts,test
+P55,Semantic similarity can recognize related meanings.,Embedding comparison estimates whether passages express similar ideas.,1,Close paraphrase,test
+P56,An operating system schedules processes.,A thermometer measures temperature.,0,Unrelated functions,test
+P57,"The model should be evaluated on data it did not use for selection.",Held-out examples provide an unbiased estimate after model choices.,1,Close paraphrase,test
+P58,A PDF may contain text or only scanned images.,A DOCX file is a compressed Word document package.,0,Different file formats,test
+P59,The threshold controls which similarity results are displayed.,A score cutoff filters out comparisons below the selected level.,1,Close paraphrase,test
+P60,The mitochondrion produces energy for a cell.,A router forwards packets between networks.,0,Unrelated subjects,test

@@ -83,7 +83,7 @@ def cluster_documents(documents, similarity_threshold=55):
             ]
             average_similarity = float(upper_triangle.mean() * 100)
         else:
-            average_similarity = 100.0
+            average_similarity = None
 
         for name in member_names:
             own_index = names.index(name)
@@ -92,14 +92,21 @@ def cluster_documents(documents, similarity_threshold=55):
                 for index in member_indices
                 if index != own_index
             ]
-            closest_similarity = (
-                float(similarities[own_index, other_indices].max() * 100)
-                if other_indices
-                else None
-            )
+            if other_indices:
+                closest_index = other_indices[
+                    int(np.argmax(similarities[own_index, other_indices]))
+                ]
+                closest_similarity = float(
+                    similarities[own_index, closest_index] * 100
+                )
+                closest_assignment = names[closest_index]
+            else:
+                closest_similarity = None
+                closest_assignment = "N/A"
             assignment_rows.append({
                 "Assignment": name,
                 "Cluster": int(cluster_id) + 1,
+                "Closest assignment": closest_assignment,
                 "Closest member similarity (%)": closest_similarity,
             })
 
@@ -107,9 +114,10 @@ def cluster_documents(documents, similarity_threshold=55):
             "Cluster": int(cluster_id) + 1,
             "Size": len(member_names),
             "Keywords": ", ".join(keywords) or "No distinctive terms",
-            "Average internal similarity (%)": round(
-                average_similarity,
-                2,
+            "Average internal similarity (%)": (
+                round(average_similarity, 2)
+                if average_similarity is not None
+                else "N/A"
             ),
             "Assignments": ", ".join(member_names),
         })

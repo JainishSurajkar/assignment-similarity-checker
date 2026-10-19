@@ -46,13 +46,24 @@ def load_dataset(path="docs/test_pairs.csv"):
 
 
 def score_dataset(dataframe):
-    """Add lexical and semantic scores on a 0-100 scale."""
+    """Add lexical and scaled semantic cosine scores.
+
+    The lexical vectorizer is fitted on training text only when labelled
+    splits are available, then applied unchanged to validation and test text.
+    """
+    training = dataframe[dataframe["split"] == "train"]
+    fit_dataframe = training if not training.empty else dataframe
+    fit_texts = (
+        fit_dataframe["text_a"].astype(str).tolist()
+        + fit_dataframe["text_b"].astype(str).tolist()
+    )
     texts = (
         dataframe["text_a"].astype(str).tolist()
         + dataframe["text_b"].astype(str).tolist()
     )
     try:
-        lexical_vectors = TfidfVectorizer().fit_transform(texts)
+        vectorizer = TfidfVectorizer().fit(fit_texts)
+        lexical_vectors = vectorizer.transform(texts)
     except ValueError as error:
         raise ValueError(
             "The evaluation text does not contain enough readable words."
@@ -65,12 +76,12 @@ def score_dataset(dataframe):
     ).diagonal() * 100
 
     model = load_semantic_model()
-    embeddings = model.encode(
+    embeddings = np.asarray(model.encode(
         texts,
         convert_to_numpy=True,
         normalize_embeddings=True,
         show_progress_bar=False,
-    )
+    ))
     semantic_scores = np.sum(
         embeddings[:count] * embeddings[count:],
         axis=1,
