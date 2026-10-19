@@ -12,10 +12,7 @@ from collection_similarity import (
     find_similarity_groups,
 )
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
-from lexical_semantic import (
-    SemanticDependencyError,
-    compare_lexical_and_semantic,
-)
+from lexical_semantic import compare_lexical_and_semantic
 from pypdf.errors import FileNotDecryptedError, PdfReadError
 from similarity import compare_paragraphs
 
@@ -406,12 +403,7 @@ def render_two_assignment_mode(uploaded_files):
                     )
                 )
                 st.session_state.lexical_semantic_signature = semantic_signature
-            except (
-                ValueError,
-                OSError,
-                SemanticDependencyError,
-                RuntimeError,
-            ) as error:
+            except (ValueError, OSError, RuntimeError) as error:
                 st.session_state.lexical_semantic_results = None
                 st.error(f"Semantic comparison failed: {error}")
 
