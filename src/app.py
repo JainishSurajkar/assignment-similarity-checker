@@ -345,7 +345,10 @@ def render_two_assignment_mode(uploaded_files):
     )
 
     if st.session_state.results is None:
-        st.info("Click **Compare assignments** to calculate the comparison.")
+        if st.session_state.input_error:
+            st.error(st.session_state.input_error)
+        else:
+            st.info("Click **Compare assignments** to calculate the comparison.")
         return
 
     matches = [
