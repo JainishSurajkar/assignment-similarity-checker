@@ -1,6 +1,11 @@
 import pandas as pd
+import pytest
 
-from evaluate_models import score_dataset
+from evaluate_models import (
+    evaluate_threshold,
+    load_dataset,
+    score_dataset,
+)
 
 
 def test_lexical_vectorizer_is_fit_on_training_text(monkeypatch):
@@ -43,3 +48,40 @@ def test_lexical_vectorizer_is_fit_on_training_text(monkeypatch):
         "train only",
         "train pair",
     ]
+
+
+def test_evaluation_metrics_include_confusion_counts():
+    dataframe = pd.DataFrame({
+        "label": [1, 0, 1, 0],
+        "score": [90, 80, 20, 10],
+    })
+    metrics = evaluate_threshold(dataframe, "score", 50)
+    assert metrics["TP"] == 1
+    assert metrics["TN"] == 1
+    assert metrics["FP"] == 1
+    assert metrics["FN"] == 1
+
+
+def test_invalid_split_is_rejected(tmp_path):
+    path = tmp_path / "pairs.csv"
+    path.write_text(
+        "pair_id,text_a,text_b,label,split\n"
+        "P1,a,b,1,development\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="Invalid split"):
+        load_dataset(path)
+
+
+def test_validation_without_training_split_is_rejected():
+    dataframe = pd.DataFrame([
+        {
+            "pair_id": "V",
+            "text_a": "validation text",
+            "text_b": "other text",
+            "label": 0,
+            "split": "validation",
+        },
+    ])
+    with pytest.raises(ValueError, match="non-empty train"):
+        score_dataset(dataframe)

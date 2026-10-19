@@ -42,6 +42,16 @@ def load_dataset(path="docs/test_pairs.csv"):
     dataframe["label"] = dataframe["label"].astype(int)
     if "split" not in dataframe.columns:
         dataframe["split"] = "all"
+    else:
+        valid_splits = {"train", "validation", "test"}
+        invalid_splits = sorted(
+            set(dataframe["split"].astype(str)) - valid_splits
+        )
+        if invalid_splits:
+            raise ValueError(
+                f"Invalid split values: {invalid_splits}. Use train, "
+                "validation, or test."
+            )
     return dataframe
 
 
@@ -52,6 +62,15 @@ def score_dataset(dataframe):
     splits are available, then applied unchanged to validation and test text.
     """
     training = dataframe[dataframe["split"] == "train"]
+    if (
+        "split" in dataframe
+        and set(dataframe["split"]) != {"all"}
+        and training.empty
+    ):
+        raise ValueError(
+            "A labelled evaluation dataset must contain a non-empty train "
+            "split before validation or test scoring."
+        )
     fit_dataframe = training if not training.empty else dataframe
     fit_texts = (
         fit_dataframe["text_a"].astype(str).tolist()
@@ -177,9 +196,15 @@ def run_evaluation(input_path, output_directory):
     output_directory.mkdir(parents=True, exist_ok=True)
     dataframe.to_csv(output_directory / "scored_pairs.csv", index=False)
 
-    if {"train", "validation", "test"} <= set(dataframe["split"]):
+    split_values = set(dataframe["split"])
+    if {"train", "validation", "test"} <= split_values:
         validation = dataframe[dataframe["split"] == "validation"]
         test = dataframe[dataframe["split"] == "test"]
+        if validation.empty or test.empty:
+            raise ValueError(
+                "Validation and test splits must each contain at least one "
+                "labelled pair."
+            )
         metrics = compare_methods(validation, test)
         metrics.to_csv(output_directory / "metrics.csv", index=False)
         for row in metrics.itertuples(index=False):

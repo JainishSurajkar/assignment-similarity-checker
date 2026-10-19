@@ -214,8 +214,10 @@ Similarity scores prioritize passages for human review; they do not prove
 plagiarism or represent a probability of copying. Shared words can come from
 prompts, textbooks, citations, or standard terminology. Semantic scores are
 scaled cosine values and can be negative. The starter evaluation dataset is
-larger than the original six examples but remains a small manually labelled
-benchmark, so its metrics are not a reliable claim of production accuracy.
+larger than the original six examples but contains illustrative labels rather
+than verified domain annotations, so its metrics are not a reliable claim of
+production accuracy. Replace or expand it with genuinely reviewed pairs before
+presenting performance results.
 Scanned PDFs require OCR, which is not implemented, and long paragraphs may
 be truncated by the embedding model.
 

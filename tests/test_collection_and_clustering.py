@@ -13,6 +13,7 @@ def test_collection_groups_similar_documents():
     })
     assert len(pairs) == 3
     assert find_similarity_groups(matrix, threshold=90) == [["a.txt", "b.txt"]]
+    assert len(pairs[pairs["similarity"] >= 90]) == 1
 
 
 def test_singleton_cluster_has_no_closest_assignment():

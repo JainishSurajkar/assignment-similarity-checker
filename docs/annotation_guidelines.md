@@ -39,3 +39,8 @@ The label is not a plagiarism judgement. A shared explanation may be caused by
 an assignment prompt, a textbook, permitted references, or standard teaching
 material. Human review and the surrounding academic context are still
 required.
+
+The repository CSV is a starter benchmark for demonstrating the evaluation
+workflow. Before making any performance claim, replace or expand it with pairs
+reviewed by people familiar with the assignment domain, record the reason for
+each label, and keep related pairs in the same split where possible.

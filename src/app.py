@@ -81,7 +81,7 @@ def paragraph_results_csv(results):
         fieldnames=[
             "paragraph_a",
             "paragraph_b",
-            "similarity_percent",
+            "Lexical similarity (TF-IDF cosine similarity, %)",
             "text_a",
             "text_b",
         ],
@@ -91,7 +91,10 @@ def paragraph_results_csv(results):
         writer.writerow({
             "paragraph_a": result["paragraph_a"],
             "paragraph_b": result["paragraph_b"],
-            "similarity_percent": round(result["similarity"] * 100, 2),
+            "Lexical similarity (TF-IDF cosine similarity, %)": round(
+                result["similarity"] * 100,
+                2,
+            ),
             "text_a": result["text_a"],
             "text_b": result["text_b"],
         })
@@ -99,7 +102,13 @@ def paragraph_results_csv(results):
 
 
 def lexical_semantic_csv(results):
-    return results.to_csv(index=False)
+    return results.rename(columns={
+        "lexical_similarity": (
+            "Lexical similarity (TF-IDF cosine similarity, %)"
+        ),
+        "semantic_similarity": "Semantic cosine score × 100",
+        "difference": "Semantic minus lexical score difference",
+    }).to_csv(index=False)
 
 
 def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
@@ -164,8 +173,16 @@ def compare_assignments():
             assignment_a,
             assignment_b
         )
+        matrix, _ = compare_document_collection({
+            "Assignment A": assignment_a,
+            "Assignment B": assignment_b,
+        })
+        st.session_state.overall_lexical_similarity = float(
+            matrix.loc["Assignment A", "Assignment B"]
+        )
     except ValueError as error:
         st.session_state.results = None
+        st.session_state.overall_lexical_similarity = None
         st.session_state.input_error = str(error)
 
 
@@ -239,10 +256,15 @@ def clear_collection_results():
     st.session_state.cluster_summary = None
     st.session_state.cluster_similarity_matrix = None
     st.session_state.cluster_input_signature = None
+    st.session_state.collection_detail_signature = None
+    st.session_state.collection_detail_results = None
+    st.session_state.collection_detail_signature = None
+    st.session_state.collection_detail_results = None
 
 
 def clear_pair_results():
     st.session_state.results = None
+    st.session_state.overall_lexical_similarity = None
     clear_semantic_results()
 
 
@@ -318,6 +340,7 @@ def render_two_assignment_mode(uploaded_files):
                 st.error(error)
         return
 
+    st.markdown("### Pair Comparison")
     st.caption(
         f"Assignment A: {uploaded_a.name} · "
         f"{len(st.session_state.assignment_a):,} extracted characters\n\n"
@@ -355,7 +378,14 @@ def render_two_assignment_mode(uploaded_files):
         result for result in st.session_state.results
         if result["similarity"] * 100 >= threshold
     ]
-    st.subheader("Similar Paragraphs")
+    st.subheader("Results · Similar Paragraphs")
+    st.warning(
+        "Similarity scores identify overlapping or related content; they do "
+        "not prove plagiarism. Common terminology, assignment instructions, "
+        "quotations, and legitimate citations may produce high similarity. "
+        "Review the highlighted passages and their context before drawing "
+        "conclusions."
+    )
     st.caption(
         f"Showing {len(matches)} of {len(st.session_state.results)} "
         f"paragraph pairs with a TF-IDF cosine similarity of at least "
@@ -368,6 +398,15 @@ def render_two_assignment_mode(uploaded_files):
         f"{len(st.session_state.results):,}",
     )
     summary_columns[2].metric("Matches shown", len(matches))
+    score_columns = st.columns(2)
+    score_columns[0].metric(
+        "Lexical similarity (TF-IDF cosine similarity, %)",
+        f"{st.session_state.overall_lexical_similarity:.1f}%",
+    )
+    score_columns[1].metric(
+        "Highest paragraph similarity",
+        f"{max(result['similarity'] for result in st.session_state.results) * 100:.1f}%",
+    )
     if st.session_state.results:
         st.download_button(
             "Download paragraph results (CSV)",
@@ -381,12 +420,13 @@ def render_two_assignment_mode(uploaded_files):
     for match in matches:
         render_pair_result(match, show_highlighting)
 
-    st.subheader("Lexical vs semantic comparison")
-    st.write(
-        "TF-IDF measures shared wording, while sentence embeddings estimate "
-        "meaning-related similarity. The semantic value is a scaled cosine "
-        "score, not a probability of plagiarism. The first run downloads the "
-        "embedding model and may take longer."
+    st.subheader("Lexical vs Semantic Comparison")
+    st.info(
+        "**TF-IDF** compares the importance of words and phrases shared "
+        "between documents. **Semantic embeddings** compare vector "
+        "representations to estimate related meaning, even when wording "
+        "differs. Semantic cosine scores are multiplied by 100 and are not "
+        "probabilities of plagiarism."
     )
     semantic_signature = collection_signature(uploaded_files)
     if st.button(
@@ -434,6 +474,10 @@ def render_two_assignment_mode(uploaded_files):
             f"Showing {len(semantic_matches)} of {len(semantic_results)} "
             "paragraph pairs meeting at least one selected threshold."
         )
+        st.caption(
+            "Semantic cosine score × 100 · Semantic minus lexical score "
+            "difference"
+        )
         st.download_button(
             "Download lexical/semantic results (CSV)",
             data=lexical_semantic_csv(semantic_results),
@@ -445,11 +489,12 @@ def render_two_assignment_mode(uploaded_files):
             with st.expander(
                 f"Paragraph A{result.paragraph_a} ↔ "
                 f"B{result.paragraph_b} — "
-                f"lexical {result.lexical_similarity:.1f}% · "
-                f"semantic {result.semantic_similarity:.1f}%"
+                f"Lexical similarity {result.lexical_similarity:.1f}% · "
+                f"Semantic cosine score × 100 "
+                f"{result.semantic_similarity:.1f}%"
             ):
                 st.write(
-                    f"Semantic minus lexical difference: "
+                    f"Semantic minus lexical score difference: "
                     f"{result.difference:+.1f} percentage points."
                 )
                 render_pair_content(
@@ -484,16 +529,23 @@ def render_collection_mode(uploaded_files):
     if len(documents) < 2:
         st.info("At least two valid assignments are required for comparison.")
         return
-    if st.button("Compare assignments", type="primary"):
-        try:
-            matrix, pairs = compare_document_collection(documents)
-        except ValueError as error:
-            st.error(str(error))
-            st.session_state.collection_matrix = None
-            st.session_state.collection_pairs = None
-        else:
-            st.session_state.collection_matrix = matrix
-            st.session_state.collection_pairs = pairs
+    st.markdown("### Collection Analysis")
+    st.caption(
+        f"{len(documents)} readable assignments loaded. Collection analysis "
+        "compares complete-document TF-IDF scores first; paragraph details "
+        "are calculated only for one selected pair."
+    )
+    if st.button("Compare assignment collection", type="primary"):
+        with st.spinner("Building the similarity matrix..."):
+            try:
+                matrix, pairs = compare_document_collection(documents)
+            except ValueError as error:
+                st.error(str(error))
+                st.session_state.collection_matrix = None
+                st.session_state.collection_pairs = None
+            else:
+                st.session_state.collection_matrix = matrix
+                st.session_state.collection_pairs = pairs
 
     matrix = st.session_state.collection_matrix
     pairs = st.session_state.collection_pairs
@@ -512,6 +564,13 @@ def render_collection_mode(uploaded_files):
     metrics[0].metric("Assignments", len(matrix))
     metrics[1].metric("Unique pairs", len(pairs))
     metrics[2].metric("Pairs above threshold", len(above_threshold))
+    st.warning(
+        "Similarity scores identify overlapping or related content; they do "
+        "not prove plagiarism. Common terminology, assignment instructions, "
+        "quotations, and legitimate citations may produce high similarity. "
+        "Review the highlighted passages and their context before drawing "
+        "conclusions."
+    )
     st.download_button(
         "Download collection results (CSV)",
         data=pairs.to_csv(index=False),
@@ -520,7 +579,7 @@ def render_collection_mode(uploaded_files):
         key="download_collection_results",
     )
 
-    st.subheader("Similarity matrix")
+    st.subheader("Results · Similarity Matrix")
     st.dataframe(
         matrix.style.format("{:.1f}%").background_gradient(
             cmap="RdYlGn",
@@ -531,6 +590,10 @@ def render_collection_mode(uploaded_files):
     )
 
     st.subheader("Groups of similar assignments")
+    st.info(
+        "**Connected groups** may include indirect links: two assignments can "
+        "belong to one group even when every pair is not above the threshold."
+    )
     group_threshold = st.slider(
         "Minimum similarity for a group connection (%)",
         min_value=1,
@@ -576,14 +639,26 @@ def render_collection_mode(uploaded_files):
             "Detailed paragraph comparison is calculated only for the "
             "selected pair."
         )
-        try:
-            paragraph_results = compare_paragraphs(
-                documents[pair["assignment_a"]],
-                documents[pair["assignment_b"]],
-            )
-        except ValueError as error:
-            st.warning(f"Paragraph comparison is unavailable: {error}")
-        else:
+        detail_signature = (
+            f"{st.session_state.collection_signature}:"
+            f"{pair['assignment_a']}:{pair['assignment_b']}"
+        )
+        if detail_signature != st.session_state.collection_detail_signature:
+            try:
+                st.session_state.collection_detail_results = (
+                    compare_paragraphs(
+                        documents[pair["assignment_a"]],
+                        documents[pair["assignment_b"]],
+                    )
+                )
+                st.session_state.collection_detail_signature = detail_signature
+            except ValueError as error:
+                st.session_state.collection_detail_results = None
+                st.session_state.collection_detail_signature = detail_signature
+                st.warning(f"Paragraph comparison is unavailable: {error}")
+
+        paragraph_results = st.session_state.collection_detail_results
+        if paragraph_results is not None:
             for result in paragraph_results[:10]:
                 with st.expander(
                     f"Paragraph {result['paragraph_a']} ↔ "
@@ -596,10 +671,10 @@ def render_collection_mode(uploaded_files):
                     )
 
     st.subheader("Clustering and pattern discovery")
-    st.write(
-        "Group assignments with similar text patterns using hierarchical "
-        "clustering. Cluster membership is an investigation aid, not proof "
-        "of plagiarism."
+    st.info(
+        "**Hierarchical clustering** organizes documents by similarity. It "
+        "does not guarantee that every pair inside a cluster exceeds the "
+        "selected setting."
     )
     cluster_threshold = st.slider(
         "Clustering similarity setting (%)",
@@ -657,10 +732,38 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown(
+    """
+    <style>
+    .block-container {max-width: 1200px; padding-top: 2rem; padding-bottom: 3rem;}
+    h1 {letter-spacing: -0.02em;}
+    h2, h3 {margin-top: 1.4rem;}
+    [data-testid="stMetric"] {background: #f7f9fc; border: 1px solid #e4e9f0;
+        padding: 0.8rem; border-radius: 0.5rem;}
+    .viva-subtitle {color: #52606d; font-size: 1.08rem; margin-top: -0.6rem;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 st.title("Assignment Similarity Checker")
-st.write(
-    "Compare two assignments or analyze a collection of assignments. "
-    "Similarity scores are not a probability of plagiarism."
+st.markdown(
+    '<p class="viva-subtitle">Compare assignment wording and semantic '
+    "similarity to identify content that deserves human review.</p>",
+    unsafe_allow_html=True,
+)
+with st.expander("How it works", expanded=False):
+    st.write(
+        "Upload exactly two assignments for paragraph-level comparison, or "
+        "three to fifty assignments for collection analysis. TF-IDF measures "
+        "weighted word overlap; optional sentence embeddings estimate related "
+        "meaning. Thresholds filter results only and never determine whether "
+        "plagiarism occurred."
+    )
+st.markdown("### Upload assignments")
+st.caption(
+    "Use exactly 2 files for Pair Comparison, or 3–50 files for Collection "
+    "Analysis. Supported formats: TXT, PDF, and DOCX. Each file is limited "
+    "to 10 MB."
 )
 
 for key, default in (
@@ -671,6 +774,7 @@ for key, default in (
     ("assignment_a_error", None),
     ("assignment_b_error", None),
     ("results", None),
+    ("overall_lexical_similarity", None),
     ("similarity_threshold", 20),
     ("input_error", None),
     ("collection_signature", None),
@@ -682,6 +786,8 @@ for key, default in (
     ("cluster_summary", None),
     ("cluster_similarity_matrix", None),
     ("cluster_input_signature", None),
+    ("collection_detail_signature", None),
+    ("collection_detail_results", None),
     ("lexical_semantic_results", None),
     ("lexical_semantic_signature", None),
 ):
