@@ -149,15 +149,18 @@ reported and the semantic method is explicitly marked unavailable.
 ### Collection analysis
 
 When three or more files are uploaded, the app displays the similarity matrix,
-summary metrics, ranked pairs, and connected groups automatically after
-**Compare assignments** is clicked. Detailed paragraph comparison is calculated
-only for the selected ranked pair, avoiding work for every possible pair.
+summary metrics, and ranked pairs after **Compare assignment collection** is
+clicked. Detailed paragraph comparison is calculated only for the selected
+ranked pair, avoiding work for every possible pair. Connected groups and
+hierarchical clustering are available in their own tabs so each result has a
+single, focused location.
 
-The **Clustering and pattern discovery** section uses average-linkage
-hierarchical clustering with cosine distance. Choose a clustering similarity
-setting and click **Discover assignment clusters** to view cluster sizes,
+The **Connected Groups** tab uses the selected threshold to show direct and
+indirect groups of related assignments. The **Hierarchical Clustering** tab
+uses average-linkage clustering with cosine distance. Choose a clustering
+setting and click **Discover or refresh clusters** to view cluster sizes,
 member assignments, important TF-IDF words and phrases, average internal
-similarity, and each assignment's closest cluster member.
+similarity, and each assignment's closest member.
 
 ## Supported files
 
@@ -217,13 +220,55 @@ implement.
 
 ## Screenshots
 
-The following screenshot was captured from the running application:
+These screenshots were captured from the running application and show the
+main workflows used during a demonstration:
+
+### Pair comparison
+
+Upload exactly two files, click **Compare assignments**, and review the
+overall TF-IDF score, paragraph matches, threshold filtering, and CSV export.
+
+![Pair Comparison tab](./screenshots/pair-comparison.png)
+
+### Collection analysis
+
+Upload three to fifty files and click **Compare assignment collection** to
+build the document-level similarity matrix and ranked pairs. Detailed
+paragraph comparison is calculated only for the selected pair.
+
+![Collection Analysis tab](./screenshots/collection-analysis.png)
+
+### Connected groups
+
+The Connected Groups tab shows assignments linked by the selected threshold,
+including indirect links between documents.
+
+![Connected Groups tab](./screenshots/connected-groups.png)
+
+### Hierarchical clustering
+
+The Hierarchical Clustering tab summarizes cluster membership, keywords,
+internal similarity, and closest assignments.
+
+![Hierarchical Clustering tab](./screenshots/hierarchical-clustering.png)
+
+### Lexical versus semantic comparison
+
+The Lexical vs Semantic tab compares TF-IDF wording overlap with the signed
+semantic cosine score scaled by 100.
+
+![Lexical vs Semantic tab](./screenshots/lexical-semantic.png)
+
+### Model evaluation
+
+The Model Evaluation tab reports the offline train/validation/test benchmark
+separately from uploaded assignments.
+
+![Model Evaluation tab](./screenshots/model-evaluation.png)
+
+The original application home-screen capture is also preserved:
 
 ![Assignment Similarity Checker home screen](./docs/app-home.png)
-
-For future releases, add further real captures for the two-file comparison,
-highlighted paragraphs, collection matrix, clustering summary, and semantic
-comparison. Do not use fabricated or unrelated images.
 
 ## Limitations
 
@@ -261,11 +306,13 @@ assignment-similarity-checker/
 │   ├── lexical_semantic.py    # Lexical and embedding-based comparison
 │   ├── evaluate_models.py     # Reproducible model evaluation
 │   ├── file_extraction.py    # TXT, PDF, and DOCX text extraction
+│   ├── upload_state.py        # Upload mode and signature state helpers
 │   └── similarity.py          # Paragraph splitting and similarity calculation
 ├── requirements.txt            # Python dependencies
 ├── docs/
 │   ├── annotation_guidelines.md
 │   └── test_pairs.csv
+├── screenshots/                # Real application screenshots
 ├── readme.md                  # Project documentation
 └── .gitignore                 # Ignored local files and environments
 ```
@@ -275,7 +322,7 @@ assignment-similarity-checker/
 - With two files, the slider and results are hidden until both assignments
   contain extractable text; results appear after **Compare assignments**.
 - With three or more files, collection results appear after at least two valid
-  files remain and **Compare assignments** is clicked.
+  files remain and **Compare assignment collection** is clicked.
 - Empty or unreadable assignments are not compared.
 - Similarity scores are displayed as percentages.
 - Individual uploads are limited to 10 MB.

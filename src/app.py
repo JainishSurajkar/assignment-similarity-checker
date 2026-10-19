@@ -18,6 +18,7 @@ from lexical_semantic import compare_lexical_and_semantic
 from evaluate_models import load_dataset, run_evaluation
 from pypdf.errors import FileNotDecryptedError, PdfReadError
 from similarity import compare_paragraphs
+from upload_state import upload_mode, upload_state_changed
 
 
 WORD_PATTERN = re.compile(r"(?u)\b\w\w+\b")
@@ -200,6 +201,24 @@ def collection_signature(uploaded_files):
     return digest.hexdigest()
 
 
+def sync_upload_mode(uploaded_files):
+    mode = upload_mode(len(uploaded_files))
+    signature = collection_signature(uploaded_files)
+    previous_mode = st.session_state.get("upload_mode")
+    previous_signature = st.session_state.get("upload_signature")
+
+    if upload_state_changed(
+        previous_mode,
+        previous_signature,
+        mode,
+        signature,
+    ):
+        clear_pair_results()
+        clear_collection_results()
+        st.session_state.upload_mode = mode
+        st.session_state.upload_signature = signature
+
+
 def unique_document_name(name, existing_names):
     if name not in existing_names:
         return name
@@ -262,8 +281,6 @@ def clear_collection_results():
     st.session_state.cluster_summary = None
     st.session_state.cluster_similarity_matrix = None
     st.session_state.cluster_input_signature = None
-    st.session_state.collection_detail_signature = None
-    st.session_state.collection_detail_results = None
     st.session_state.collection_detail_signature = None
     st.session_state.collection_detail_results = None
 
@@ -454,94 +471,6 @@ def render_two_assignment_mode(uploaded_files):
     for match in matches:
         render_pair_result(match, show_highlighting)
 
-    st.subheader("Lexical vs Semantic Comparison")
-    st.info(
-        "**TF-IDF** compares the importance of words and phrases shared "
-        "between documents. **Semantic embeddings** compare vector "
-        "representations to estimate related meaning, even when wording "
-        "differs. Semantic cosine scores are multiplied by 100 and are not "
-        "probabilities of plagiarism."
-    )
-    semantic_signature = collection_signature(uploaded_files)
-    if st.button(
-        "Compare lexical and semantic similarity",
-        type="secondary",
-        key="compare_semantic",
-    ):
-        with st.spinner("Loading the semantic model and comparing paragraphs..."):
-            try:
-                st.session_state.lexical_semantic_results = (
-                    compare_lexical_and_semantic(
-                        st.session_state.assignment_a,
-                        st.session_state.assignment_b,
-                    )
-                )
-                st.session_state.lexical_semantic_signature = semantic_signature
-            except (ValueError, OSError, RuntimeError) as error:
-                st.session_state.lexical_semantic_results = None
-                st.error(f"Semantic comparison failed: {error}")
-
-    semantic_results = st.session_state.lexical_semantic_results
-    if (
-        semantic_results is not None
-        and st.session_state.lexical_semantic_signature == semantic_signature
-    ):
-        lexical_threshold = st.slider(
-            "Minimum lexical similarity (%)",
-            min_value=0,
-            max_value=100,
-            value=20,
-            key="lexical_threshold",
-        )
-        semantic_threshold = st.slider(
-            "Minimum scaled semantic cosine score (%)",
-            min_value=-100,
-            max_value=100,
-            value=50,
-            key="semantic_threshold",
-        )
-        semantic_matches = semantic_results[
-            (semantic_results["lexical_similarity"] >= lexical_threshold)
-            | (semantic_results["semantic_similarity"] >= semantic_threshold)
-        ]
-        st.caption(
-            f"Showing {len(semantic_matches)} of {len(semantic_results)} "
-            "paragraph pairs meeting at least one selected threshold."
-        )
-        st.caption(
-            "Semantic cosine score × 100 · Semantic minus lexical score "
-            "difference"
-        )
-        st.download_button(
-            "Download lexical/semantic results (CSV)",
-            data=lexical_semantic_csv(semantic_results),
-            file_name="lexical-semantic-results.csv",
-            mime="text/csv",
-            key="download_semantic_results",
-        )
-        for result in semantic_matches.itertuples(index=False):
-            with st.expander(
-                f"Paragraph A{result.paragraph_a} ↔ "
-                f"B{result.paragraph_b} — "
-                f"Lexical similarity {result.lexical_similarity:.1f}% · "
-                f"Semantic cosine score × 100 "
-                f"{result.semantic_similarity:.1f}%"
-            ):
-                st.write(
-                    f"Semantic minus lexical score difference: "
-                    f"{result.difference:+.1f} percentage points."
-                )
-                render_pair_content(
-                    {
-                        "text_a": result.text_a,
-                        "text_b": result.text_b,
-                    },
-                    show_highlighting=show_highlighting,
-                )
-    elif semantic_results is not None:
-        st.info("The uploaded assignments changed. Run the semantic comparison again.")
-
-
 def render_collection_mode(uploaded_files):
     signature = collection_signature(uploaded_files)
     if signature != st.session_state.collection_signature:
@@ -623,18 +552,6 @@ def render_collection_mode(uploaded_files):
         width="stretch",
     )
 
-    st.subheader("Groups of similar assignments")
-    st.info(
-        "**Connected groups** may include indirect links: two assignments can "
-        "belong to one group even when every pair is not above the threshold."
-    )
-    group_threshold = st.slider(
-        "Minimum similarity for a group connection (%)",
-        min_value=1,
-        max_value=100,
-        value=50,
-        key="group_threshold",
-    )
     show_highlighting = st.checkbox(
         "Show shared-word highlighting in paragraph details",
         key="collection_show_shared_word_highlighting",
@@ -643,14 +560,6 @@ def render_collection_mode(uploaded_files):
             "and not proof of plagiarism."
         ),
     )
-    groups = find_similarity_groups(matrix, group_threshold)
-    if not groups:
-        st.info("No groups of two or more assignments meet this threshold.")
-    for index, group in enumerate(groups, start=1):
-        with st.expander(f"Group {index} — {len(group)} assignments"):
-            for document in group:
-                st.write(f"- {document}")
-
     st.subheader("Most similar assignment pairs")
     if above_threshold.empty:
         st.info("No assignment pairs meet the selected threshold.")
@@ -703,62 +612,6 @@ def render_collection_mode(uploaded_files):
                         result,
                         show_highlighting=show_highlighting,
                     )
-
-    st.subheader("Clustering and pattern discovery")
-    st.info(
-        "**Hierarchical clustering** organizes documents by similarity. It "
-        "does not guarantee that every pair inside a cluster exceeds the "
-        "selected setting."
-    )
-    cluster_threshold = st.slider(
-        "Clustering similarity setting (%)",
-        min_value=10,
-        max_value=90,
-        value=55,
-        step=5,
-        help=(
-            "A higher setting generally creates smaller, stricter groups. "
-            "This is an average-linkage distance setting and is not a "
-            "guaranteed minimum for every pair in a cluster."
-        ),
-        key="cluster_threshold",
-    )
-    if st.button("Discover assignment clusters", type="primary"):
-        try:
-            assignments, summary, similarity_matrix = cluster_documents(
-                documents,
-                similarity_threshold=cluster_threshold,
-            )
-        except ValueError as error:
-            st.error(str(error))
-        else:
-            st.session_state.cluster_assignments = assignments
-            st.session_state.cluster_summary = summary
-            st.session_state.cluster_similarity_matrix = similarity_matrix
-            st.session_state.cluster_input_signature = (
-                st.session_state.collection_signature
-            )
-
-    if (
-        st.session_state.cluster_summary is not None
-        and st.session_state.cluster_input_signature
-        == st.session_state.collection_signature
-    ):
-        st.subheader("Cluster overview")
-        st.dataframe(
-            st.session_state.cluster_summary,
-            hide_index=True,
-            width="stretch",
-        )
-        st.subheader("Assignments by cluster")
-        st.dataframe(
-            st.session_state.cluster_assignments,
-            hide_index=True,
-            width="stretch",
-        )
-    elif st.session_state.cluster_summary is not None:
-        st.info("The uploaded assignments changed. Run clustering again.")
-
 
 def render_connected_groups_tab():
     st.caption(
@@ -1079,6 +932,8 @@ for key, default in (
     ("collection_detail_results", None),
     ("lexical_semantic_results", None),
     ("lexical_semantic_signature", None),
+    ("upload_mode", None),
+    ("upload_signature", None),
     ("evaluation_metrics", None),
     ("evaluation_semantic_error", None),
 ):
@@ -1098,9 +953,8 @@ uploaded_files = st.file_uploader(
 
 if len(uploaded_files) > MAX_ASSIGNMENTS:
     st.error("Please upload no more than 50 assignments.")
-    clear_pair_results()
-    clear_collection_results()
 else:
+    sync_upload_mode(uploaded_files)
     pair_tab, collection_tab, groups_tab, clustering_tab, semantic_tab, evaluation_tab = st.tabs([
         "Pair Comparison",
         "Collection Analysis",
