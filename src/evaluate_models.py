@@ -118,7 +118,8 @@ def evaluate_threshold(dataframe, score_column, threshold):
 def select_threshold(validation_dataframe, score_column):
     best_threshold = 0.0
     best_f1 = -1.0
-    for threshold in np.linspace(0, 100, 201):
+    minimum = -100 if score_column == "semantic_score" else 0
+    for threshold in np.linspace(minimum, 100, 201):
         metrics = evaluate_threshold(
             validation_dataframe,
             score_column,

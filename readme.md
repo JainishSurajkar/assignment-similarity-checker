@@ -22,7 +22,7 @@ probabilities or disciplinary decisions.
 - Use a different color for each shared word, with the same color applied in
   both paragraphs.
 - Show the similarity percentage for every displayed paragraph pair.
-- Analyze a collection of 2 to 50 assignments in the collection analyzer.
+- Analyze a collection of 3 to 50 assignments in the collection analyzer.
 - Display a document-level similarity matrix and ranked assignment pairs.
 - Discover connected groups of assignments above a selected threshold.
 - Discover hierarchical clusters with explanatory keywords and internal
@@ -200,10 +200,24 @@ implement.
 
 ## Screenshots
 
-Capture real application screenshots under `docs/screenshots/` before a
-release. Recommended views are the two-file comparison, highlighted
-paragraphs, collection matrix, clustering summary, and semantic comparison.
-The repository does not include fabricated screenshots.
+The following screenshot was captured from the running application:
+
+![Assignment Similarity Checker home screen](./docs/app-home.png)
+
+For future releases, add further real captures for the two-file comparison,
+highlighted paragraphs, collection matrix, clustering summary, and semantic
+comparison. Do not use fabricated or unrelated images.
+
+## Limitations
+
+Similarity scores prioritize passages for human review; they do not prove
+plagiarism or represent a probability of copying. Shared words can come from
+prompts, textbooks, citations, or standard terminology. Semantic scores are
+scaled cosine values and can be negative. The starter evaluation dataset is
+larger than the original six examples but remains a small manually labelled
+benchmark, so its metrics are not a reliable claim of production accuracy.
+Scanned PDFs require OCR, which is not implemented, and long paragraphs may
+be truncated by the embedding model.
 
 ## Testing
 
@@ -228,8 +242,7 @@ assignment-similarity-checker/
 │   ├── lexical_semantic.py    # Lexical and embedding-based comparison
 │   ├── evaluate_models.py     # Reproducible model evaluation
 │   ├── file_extraction.py    # TXT, PDF, and DOCX text extraction
-│   ├── similarity.py          # Paragraph splitting and similarity calculation
-│   └── text_preprocessing.py # Additional preprocessing examples/utilities
+│   └── similarity.py          # Paragraph splitting and similarity calculation
 ├── requirements.txt            # Python dependencies
 ├── docs/
 │   ├── annotation_guidelines.md
