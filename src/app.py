@@ -3,7 +3,9 @@ import html
 import re
 from io import StringIO
 import csv
+from pathlib import Path
 
+import pandas as pd
 import streamlit as st
 from docx.opc.exceptions import PackageNotFoundError
 from cluster_analysis import cluster_documents
@@ -13,6 +15,7 @@ from collection_similarity import (
 )
 from file_extraction import SUPPORTED_FILE_TYPES, extract_text
 from lexical_semantic import compare_lexical_and_semantic
+from evaluate_models import load_dataset, run_evaluation
 from pypdf.errors import FileNotDecryptedError, PdfReadError
 from similarity import compare_paragraphs
 
@@ -30,6 +33,9 @@ HIGHLIGHT_COLORS = (
 )
 MAX_ASSIGNMENTS = 50
 MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+EVALUATION_DATASET = PROJECT_ROOT / "docs" / "test_pairs.csv"
+EVALUATION_OUTPUT = PROJECT_ROOT / "docs" / "evaluation"
 
 
 def shared_words(text_a, text_b):
@@ -275,6 +281,16 @@ def clear_semantic_results():
 
 def render_pair_content(match, show_highlighting=False):
     assignment_col, comparison_col = st.columns(2)
+    panel_style = (
+        "background-color:#f8fafc !important;"
+        "color:#111827 !important;"
+        "border:1px solid #cbd5e1;"
+        "border-radius:8px;"
+        "padding:14px 16px;"
+        "min-height:48px;"
+        "line-height:1.55;"
+        "overflow-wrap:anywhere;"
+    )
 
     with assignment_col:
         st.markdown("**Assignment A**")
@@ -287,19 +303,37 @@ def render_pair_content(match, show_highlighting=False):
         )
         with assignment_col:
             st.markdown(
-                highlight_shared_words(match["text_a"], colors),
+                (
+                    f"<div class='assignment-text' style='{panel_style}'>"
+                    + highlight_shared_words(match["text_a"], colors)
+                    + "</div>"
+                ),
                 unsafe_allow_html=True
             )
         with comparison_col:
             st.markdown(
-                highlight_shared_words(match["text_b"], colors),
+                (
+                    f"<div class='assignment-text' style='{panel_style}'>"
+                    + highlight_shared_words(match["text_b"], colors)
+                    + "</div>"
+                ),
                 unsafe_allow_html=True
             )
     else:
         with assignment_col:
-            st.write(match["text_a"])
+            st.markdown(
+                f"<div class='assignment-text' style='{panel_style}'>"
+                + html.escape(match["text_a"]).replace("\n", "<br>")
+                + "</div>",
+                unsafe_allow_html=True,
+            )
         with comparison_col:
-            st.write(match["text_b"])
+            st.markdown(
+                f"<div class='assignment-text' style='{panel_style}'>"
+                + html.escape(match["text_b"]).replace("\n", "<br>")
+                + "</div>",
+                unsafe_allow_html=True,
+            )
 
 
 def render_pair_result(match, show_highlighting):
@@ -726,6 +760,234 @@ def render_collection_mode(uploaded_files):
         st.info("The uploaded assignments changed. Run clustering again.")
 
 
+def render_connected_groups_tab():
+    st.caption(
+        "Connected components use the selected similarity threshold. "
+        "Assignments can be linked indirectly, so not every pair in a group "
+        "must exceed the threshold."
+    )
+    matrix = st.session_state.collection_matrix
+    if matrix is None:
+        st.info(
+            "Upload at least three assignments and run Collection Analysis "
+            "first."
+        )
+        return
+    threshold = st.slider(
+        "Group connection threshold (%)",
+        1,
+        100,
+        50,
+        key="groups_tab_threshold",
+    )
+    groups = find_similarity_groups(matrix, threshold)
+    if not groups:
+        st.info("No connected groups meet the selected threshold.")
+        return
+    for index, group in enumerate(groups, 1):
+        st.subheader(f"Group {index} · {len(group)} assignments")
+        st.dataframe(
+            pd.DataFrame({"Assignment": group}),
+            hide_index=True,
+            width="stretch",
+        )
+
+
+def render_clustering_tab():
+    st.caption(
+        "Average-linkage hierarchical clustering organizes documents by "
+        "similarity. It does not guarantee every pair inside a cluster "
+        "exceeds the selected setting."
+    )
+    documents = st.session_state.collection_documents
+    if len(documents) < 2:
+        st.info(
+            "Upload at least three assignments and run Collection Analysis "
+            "first."
+        )
+        return
+    threshold = st.slider(
+        "Clustering similarity setting (%)",
+        10,
+        90,
+        55,
+        step=5,
+        key="clustering_tab_threshold",
+    )
+    if st.button("Discover or refresh clusters", type="primary"):
+        with st.spinner("Building hierarchical clusters..."):
+            try:
+                assignments, summary, matrix = cluster_documents(
+                    documents,
+                    similarity_threshold=threshold,
+                )
+            except ValueError as error:
+                st.error(str(error))
+            else:
+                st.session_state.cluster_assignments = assignments
+                st.session_state.cluster_summary = summary
+                st.session_state.cluster_similarity_matrix = matrix
+                st.session_state.cluster_input_signature = (
+                    st.session_state.collection_signature
+                )
+    if st.session_state.cluster_input_signature != (
+        st.session_state.collection_signature
+    ):
+        st.info("Run clustering to generate results for the current uploads.")
+        return
+    if st.session_state.cluster_summary is None:
+        st.info("Click **Discover or refresh clusters** to begin.")
+        return
+    st.subheader("Cluster summaries")
+    st.dataframe(
+        st.session_state.cluster_summary,
+        hide_index=True,
+        width="stretch",
+    )
+    st.subheader("Assignments by cluster")
+    st.dataframe(
+        st.session_state.cluster_assignments,
+        hide_index=True,
+        width="stretch",
+    )
+
+
+def render_evaluation_tab():
+    st.caption(
+        "This is an offline benchmark, separate from uploaded assignments. "
+        "Thresholds are selected on validation data and final metrics are "
+        "calculated only on the held-out test split."
+    )
+    try:
+        dataset = load_dataset(EVALUATION_DATASET)
+    except (OSError, ValueError, pd.errors.ParserError) as error:
+        st.error(f"Evaluation dataset is invalid: {error}")
+        return
+    split_counts = dataset["split"].value_counts()
+    st.dataframe(
+        split_counts.rename("Pairs").rename_axis("Split").reset_index(),
+        hide_index=True,
+        width="stretch",
+    )
+    st.warning(
+        "The starter labels are illustrative and are not a reliable "
+        "production-accuracy claim. Replace them with genuinely reviewed "
+        "domain-specific pairs before presenting performance metrics."
+    )
+    if st.button("Run held-out model evaluation", type="primary"):
+        with st.spinner("Scoring the labelled dataset..."):
+            try:
+                metrics = run_evaluation(
+                    EVALUATION_DATASET,
+                    EVALUATION_OUTPUT,
+                )
+            except (OSError, ValueError, RuntimeError) as error:
+                st.session_state.evaluation_metrics = None
+                st.session_state.evaluation_semantic_error = None
+                st.error(f"Evaluation could not be completed: {error}")
+            else:
+                st.session_state.evaluation_metrics = metrics
+                st.session_state.evaluation_semantic_error = (
+                    metrics.attrs.get("semantic_error")
+                )
+    metrics = st.session_state.evaluation_metrics
+    if metrics is None:
+        st.info("Run the evaluation to display held-out metrics.")
+        return
+    st.subheader("Held-out test metrics")
+    if st.session_state.get("evaluation_semantic_error"):
+        st.warning(
+            "Lexical evaluation completed, but semantic evaluation was "
+            "skipped: "
+            + st.session_state.evaluation_semantic_error
+        )
+    st.dataframe(metrics, hide_index=True, width="stretch")
+    st.caption(
+        "False-positive and false-negative CSV reports are written to "
+        "docs/evaluation/."
+    )
+
+
+def render_semantic_tab(uploaded_files):
+    if len(uploaded_files) != 2:
+        st.info("Upload exactly two readable assignments first.")
+        return
+    if not (
+        st.session_state.assignment_a.strip()
+        and st.session_state.assignment_b.strip()
+    ):
+        st.info("Both uploaded assignments must contain readable text.")
+        return
+    st.info(
+        "**Lexical similarity (TF-IDF cosine similarity, %)** measures "
+        "weighted word overlap. **Semantic cosine score × 100** estimates "
+        "meaning-related similarity from sentence embeddings. Neither score "
+        "is a plagiarism probability."
+    )
+    signature = collection_signature(uploaded_files)
+    if st.button(
+        "Run lexical and semantic comparison",
+        type="primary",
+        key="semantic_tab_compare",
+    ):
+        with st.spinner("Loading the embedding model and scoring paragraphs..."):
+            try:
+                st.session_state.lexical_semantic_results = (
+                    compare_lexical_and_semantic(
+                        st.session_state.assignment_a,
+                        st.session_state.assignment_b,
+                    )
+                )
+                st.session_state.lexical_semantic_signature = signature
+            except (ValueError, OSError, RuntimeError) as error:
+                st.session_state.lexical_semantic_results = None
+                st.error(f"Semantic comparison failed: {error}")
+    results = st.session_state.lexical_semantic_results
+    if results is None or st.session_state.lexical_semantic_signature != signature:
+        st.info("Run the comparison to display semantic results.")
+        return
+    lexical_threshold = st.slider(
+        "Minimum lexical similarity (TF-IDF cosine similarity, %)",
+        0,
+        100,
+        20,
+        key="semantic_tab_lexical_threshold",
+    )
+    semantic_threshold = st.slider(
+        "Minimum semantic cosine score × 100",
+        -100,
+        100,
+        50,
+        key="semantic_tab_threshold",
+    )
+    matches = results[
+        (results["lexical_similarity"] >= lexical_threshold)
+        | (results["semantic_similarity"] >= semantic_threshold)
+    ]
+    st.caption(f"Showing {len(matches)} of {len(results)} paragraph pairs.")
+    st.download_button(
+        "Download lexical and semantic results (CSV)",
+        data=lexical_semantic_csv(results),
+        file_name="lexical-semantic-results.csv",
+        mime="text/csv",
+        key="semantic_tab_download",
+    )
+    for result in matches.itertuples(index=False):
+        with st.expander(
+            f"Paragraph A{result.paragraph_a} ↔ B{result.paragraph_b} · "
+            f"Lexical {result.lexical_similarity:.1f}% · "
+            f"Semantic {result.semantic_similarity:.1f}%"
+        ):
+            st.write(
+                f"Semantic minus lexical score difference: "
+                f"{result.difference:+.1f}"
+            )
+            render_pair_content(
+                {"text_a": result.text_a, "text_b": result.text_b},
+                show_highlighting=False,
+            )
+
+
 st.set_page_config(
     page_title="Assignment Similarity Checker",
     page_icon="📚",
@@ -740,7 +1002,34 @@ st.markdown(
     h2, h3 {margin-top: 1.4rem;}
     [data-testid="stMetric"] {background: #f7f9fc; border: 1px solid #e4e9f0;
         padding: 0.8rem; border-radius: 0.5rem;}
+    [data-testid="stMetric"] [data-testid="stMetricLabel"],
+    [data-testid="stMetric"] [data-testid="stMetricLabel"] *,
+    [data-testid="stMetric"] [data-testid="stMetricValue"],
+    [data-testid="stMetric"] [data-testid="stMetricValue"] *,
+    [data-testid="stMetric"] [data-testid="stMetricDelta"],
+    [data-testid="stMetric"] [data-testid="stMetricDelta"] * {
+        color: #111827 !important;
+    }
     .viva-subtitle {color: #52606d; font-size: 1.08rem; margin-top: -0.6rem;}
+    .assignment-text {
+        background: #ffffff !important;
+        color: #1f2937 !important;
+        border: 1px solid #d7dee8;
+        border-radius: 0.5rem;
+        padding: 0.9rem 1rem;
+        min-height: 3rem;
+        line-height: 1.55;
+        overflow-wrap: anywhere;
+    }
+    .assignment-text p,
+    .assignment-text span,
+    .assignment-text div {
+        background: transparent !important;
+        color: #1f2937 !important;
+    }
+    .assignment-text mark {
+        color: #1f2937 !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -790,6 +1079,8 @@ for key, default in (
     ("collection_detail_results", None),
     ("lexical_semantic_results", None),
     ("lexical_semantic_signature", None),
+    ("evaluation_metrics", None),
+    ("evaluation_semantic_error", None),
 ):
     if key not in st.session_state:
         st.session_state[key] = default
@@ -809,14 +1100,30 @@ if len(uploaded_files) > MAX_ASSIGNMENTS:
     st.error("Please upload no more than 50 assignments.")
     clear_pair_results()
     clear_collection_results()
-elif len(uploaded_files) < 2:
-    clear_pair_results()
-    clear_collection_results()
-    st.info(
-        "Upload exactly 2 files for a detailed comparison, or at least 3 "
-        "files to analyze a collection."
-    )
-elif len(uploaded_files) == 2:
-    render_two_assignment_mode(uploaded_files)
 else:
-    render_collection_mode(uploaded_files)
+    pair_tab, collection_tab, groups_tab, clustering_tab, semantic_tab, evaluation_tab = st.tabs([
+        "Pair Comparison",
+        "Collection Analysis",
+        "Connected Groups",
+        "Hierarchical Clustering",
+        "Lexical vs Semantic",
+        "Model Evaluation",
+    ])
+    with pair_tab:
+        if len(uploaded_files) == 2:
+            render_two_assignment_mode(uploaded_files)
+        else:
+            st.info("Upload exactly two files to use Pair Comparison.")
+    with collection_tab:
+        if len(uploaded_files) >= 3:
+            render_collection_mode(uploaded_files)
+        else:
+            st.info("Upload three to fifty files to use Collection Analysis.")
+    with groups_tab:
+        render_connected_groups_tab()
+    with clustering_tab:
+        render_clustering_tab()
+    with semantic_tab:
+        render_semantic_tab(uploaded_files)
+    with evaluation_tab:
+        render_evaluation_tab()

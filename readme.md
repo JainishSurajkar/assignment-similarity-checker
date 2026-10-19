@@ -88,6 +88,21 @@ higher threshold displays only paragraph pairs with higher similarity scores.
 The highlighting option marks common individual words; it does not identify
 exact copied phrases or establish plagiarism.
 
+### Application tabs
+
+- **Pair Comparison** handles exactly two uploads and shows overall TF-IDF
+  similarity plus ranked paragraph matches.
+- **Collection Analysis** handles three to fifty uploads and shows the matrix,
+  ranked document pairs, and one selected pair's paragraph details.
+- **Connected Groups** shows threshold-based connected components, including
+  indirect links.
+- **Hierarchical Clustering** shows average-linkage clusters, keywords,
+  average internal similarity, and closest assignments.
+- **Lexical vs Semantic** compares wording overlap with signed semantic cosine
+  scores.
+- **Model Evaluation** runs the offline train/validation/test benchmark only
+  when all required splits are valid.
+
 ### Lexical versus semantic comparison
 
 With exactly two uploaded files, click **Compare lexical and semantic
@@ -125,9 +140,11 @@ python src\evaluate_models.py
 
 It creates `docs\evaluation\scored_pairs.csv`, `metrics.csv`, and separate
 error files for each method. Thresholds are selected by F1-score on the
-validation split and measured on the held-out test split. If no split column
-is provided, the script reports exploratory metrics at a 50% threshold; those
-metrics should not be presented as final performance results.
+validation split and measured on the held-out test split. The evaluator
+requires exactly `train`, `validation`, and `test` splits and never reports
+all-data metrics as held-out performance. If `sentence-transformers` is not
+installed or the model cannot load, lexical held-out metrics are still
+reported and the semantic method is explicitly marked unavailable.
 
 ### Collection analysis
 

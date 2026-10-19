@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from evaluate_models import (
+    compare_methods,
     evaluate_threshold,
     load_dataset,
     score_dataset,
@@ -85,3 +86,21 @@ def test_validation_without_training_split_is_rejected():
     ])
     with pytest.raises(ValueError, match="non-empty train"):
         score_dataset(dataframe)
+
+
+def test_threshold_selection_does_not_use_test_labels():
+    validation = pd.DataFrame({
+        "label": [0, 1],
+        "lexical_score": [10, 90],
+        "semantic_score": [10, 90],
+    })
+    test_a = pd.DataFrame({
+        "label": [0, 1],
+        "lexical_score": [20, 80],
+        "semantic_score": [20, 80],
+    })
+    test_b = test_a.copy()
+    test_b["label"] = [1, 0]
+    metrics_a = compare_methods(validation, test_a)
+    metrics_b = compare_methods(validation, test_b)
+    assert metrics_a["Threshold"].tolist() == metrics_b["Threshold"].tolist()

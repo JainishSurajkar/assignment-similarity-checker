@@ -12,14 +12,17 @@ from sklearn.metrics import (
 )
 from sklearn.metrics.pairwise import cosine_similarity
 
-from lexical_semantic import load_semantic_model
+from lexical_semantic import SemanticDependencyError, load_semantic_model
 
 
 REQUIRED_COLUMNS = ["pair_id", "text_a", "text_b", "label"]
 SCORE_COLUMNS = ["lexical_score", "semantic_score"]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_DATASET = PROJECT_ROOT / "docs" / "test_pairs.csv"
+DEFAULT_OUTPUT = PROJECT_ROOT / "docs" / "evaluation"
 
 
-def load_dataset(path="docs/test_pairs.csv"):
+def load_dataset(path=DEFAULT_DATASET):
     dataframe = pd.read_csv(path)
     missing = [
         column for column in REQUIRED_COLUMNS
@@ -94,21 +97,24 @@ def score_dataset(dataframe):
         lexical_vectors[count:],
     ).diagonal() * 100
 
-    model = load_semantic_model()
-    embeddings = np.asarray(model.encode(
-        texts,
-        convert_to_numpy=True,
-        normalize_embeddings=True,
-        show_progress_bar=False,
-    ))
-    semantic_scores = np.sum(
-        embeddings[:count] * embeddings[count:],
-        axis=1,
-    ) * 100
-
     scored = dataframe.copy()
     scored["lexical_score"] = lexical_scores
-    scored["semantic_score"] = semantic_scores
+    try:
+        model = load_semantic_model()
+        embeddings = np.asarray(model.encode(
+            texts,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        ))
+    except (SemanticDependencyError, OSError, RuntimeError) as error:
+        scored.attrs["semantic_error"] = str(error)
+        scored["semantic_score"] = np.nan
+    else:
+        scored["semantic_score"] = np.sum(
+            embeddings[:count] * embeddings[count:],
+            axis=1,
+        ) * 100
     return scored
 
 
@@ -192,38 +198,51 @@ def get_misclassified_pairs(dataframe, score_column, threshold):
 
 
 def run_evaluation(input_path, output_directory):
-    dataframe = score_dataset(load_dataset(input_path))
+    dataframe = load_dataset(input_path)
+    required_splits = {"train", "validation", "test"}
+    if set(dataframe["split"]) != required_splits:
+        raise ValueError(
+            "Held-out evaluation requires exactly train, validation, and "
+            "test splits. No all-data metrics were generated."
+        )
+    dataframe = score_dataset(dataframe)
     output_directory.mkdir(parents=True, exist_ok=True)
     dataframe.to_csv(output_directory / "scored_pairs.csv", index=False)
 
-    split_values = set(dataframe["split"])
-    if {"train", "validation", "test"} <= split_values:
-        validation = dataframe[dataframe["split"] == "validation"]
-        test = dataframe[dataframe["split"] == "test"]
-        if validation.empty or test.empty:
-            raise ValueError(
-                "Validation and test splits must each contain at least one "
-                "labelled pair."
-            )
-        metrics = compare_methods(validation, test)
-        metrics.to_csv(output_directory / "metrics.csv", index=False)
-        for row in metrics.itertuples(index=False):
-            errors = get_misclassified_pairs(
-                test,
-                row.Method,
-                row.Threshold,
-            )
-            errors.to_csv(
-                output_directory / f"{row.Method}-errors.csv",
-                index=False,
-            )
-        return metrics
-
-    metrics = pd.DataFrame([
-        evaluate_threshold(dataframe, column, 50)
-        for column in SCORE_COLUMNS
-    ])
+    validation = dataframe[dataframe["split"] == "validation"]
+    test = dataframe[dataframe["split"] == "test"]
+    if validation.empty or test.empty:
+        raise ValueError(
+            "Validation and test splits must each contain at least one "
+            "labelled pair."
+        )
+    available_scores = [
+        column for column in SCORE_COLUMNS
+        if not validation[column].isna().all()
+    ]
+    if not available_scores:
+        raise ValueError(
+            "No evaluation model produced usable scores. Install semantic "
+            "dependencies or check the evaluation inputs."
+        )
+    metrics = []
+    for score_column in available_scores:
+        threshold = select_threshold(validation, score_column)
+        metrics.append(evaluate_threshold(test, score_column, threshold))
+    metrics = pd.DataFrame(metrics)
+    if dataframe.attrs.get("semantic_error"):
+        metrics.attrs["semantic_error"] = dataframe.attrs["semantic_error"]
     metrics.to_csv(output_directory / "metrics.csv", index=False)
+    for row in metrics.itertuples(index=False):
+        errors = get_misclassified_pairs(
+            test,
+            row.Method,
+            row.Threshold,
+        )
+        errors.to_csv(
+            output_directory / f"{row.Method}-errors.csv",
+            index=False,
+        )
     return metrics
 
 
@@ -233,12 +252,12 @@ def main():
     )
     parser.add_argument(
         "--input",
-        default="docs/test_pairs.csv",
+        default=str(DEFAULT_DATASET),
         help="Path to the labelled pair CSV.",
     )
     parser.add_argument(
         "--output-dir",
-        default="docs/evaluation",
+        default=str(DEFAULT_OUTPUT),
         help="Directory for scored pairs, metrics, and error CSVs.",
     )
     args = parser.parse_args()
