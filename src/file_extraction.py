@@ -68,7 +68,7 @@ def _ocr_pdf(file_bytes, page_indexes=None):
         raise OcrError(f"Could not render this PDF for OCR: {error}") from error
 
 
-def _extract_docx_text(document):
+def _extract_docx_text(document, use_ocr):
     blocks = [
         paragraph.text.strip()
         for paragraph in document.paragraphs
@@ -83,19 +83,20 @@ def _extract_docx_text(document):
             ]
             if cells:
                 blocks.append(" | ".join(cells))
-    for shape in document.inline_shapes:
-        relationship_id = (
-            shape._inline.graphic.graphicData.pic.pic.blipFill.blip.embed
-        )
-        image_part = document.part.related_parts[relationship_id]
-        image = Image.open(BytesIO(image_part.blob))
-        text = _ocr_image(image)
-        if text:
-            blocks.append(text)
+    if use_ocr:
+        for shape in document.inline_shapes:
+            relationship_id = (
+                shape._inline.graphic.graphicData.pic.pic.blipFill.blip.embed
+            )
+            image_part = document.part.related_parts[relationship_id]
+            image = Image.open(BytesIO(image_part.blob))
+            text = _ocr_image(image)
+            if text:
+                blocks.append(text)
     return "\n\n".join(blocks)
 
 
-def extract_text(uploaded_file) -> str:
+def extract_text(uploaded_file, use_ocr=False) -> str:
     """Extract plain text from a supported Streamlit uploaded file."""
     extension = Path(uploaded_file.name).suffix.lower()
     file_bytes = uploaded_file.getvalue()
@@ -118,12 +119,17 @@ def extract_text(uploaded_file) -> str:
         missing_page_indexes = [
             index for index, page in enumerate(pages) if not page.strip()
         ]
-        if missing_page_indexes:
+        if missing_page_indexes and use_ocr:
             ocr_text = _ocr_pdf(file_bytes, missing_page_indexes)
             if ocr_text:
                 text_pages.append(ocr_text)
         text = "\n\n".join(text_pages)
         if not text.strip():
+            if not use_ocr:
+                raise ValueError(
+                    "This PDF contains no readable text. Enable "
+                    "the OCR option to read scanned pages."
+                )
             raise ValueError("This PDF contains no readable text.")
         return text
 
@@ -135,7 +141,7 @@ def extract_text(uploaded_file) -> str:
                 "This DOCX file is corrupt or not a valid Word document."
             ) from error
 
-        text = _extract_docx_text(document)
+        text = _extract_docx_text(document, use_ocr)
         if not text.strip():
             raise ValueError(
                 "This DOCX file contains no readable text."
@@ -143,6 +149,10 @@ def extract_text(uploaded_file) -> str:
         return text
 
     if extension in {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}:
+        if not use_ocr:
+            raise ValueError(
+                "Image files require the OCR option to be enabled."
+            )
         try:
             text = _ocr_image(Image.open(BytesIO(file_bytes)))
         except (OSError, ValueError) as error:

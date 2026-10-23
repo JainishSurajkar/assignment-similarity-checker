@@ -172,8 +172,11 @@ similarity, and each assignment's closest member.
 - **Images**: PNG, JPG, JPEG, BMP, TIF, and TIFF images are read with OCR.
 
 OCR requires the Tesseract executable to be installed and available on the
-system `PATH`. Legacy `.doc` files are not supported. Save Word documents as
-`.docx` before uploading them.
+system `PATH`. Enable the **OCR for scanned PDFs and image files** option in
+the app before uploading scanned or image-based content. With OCR disabled,
+the app uses normal text extraction only and image files are rejected.
+Legacy `.doc` files are not supported. Save Word documents as `.docx` before
+uploading them.
 
 ## How similarity is calculated
 

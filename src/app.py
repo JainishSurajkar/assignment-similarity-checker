@@ -119,7 +119,13 @@ def lexical_semantic_csv(results):
     }).to_csv(index=False)
 
 
-def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
+def sync_uploaded_file(
+    uploaded_file,
+    text_key,
+    upload_key,
+    error_key,
+    use_ocr=False,
+):
     if uploaded_file is None:
         st.session_state[text_key] = ""
         st.session_state[upload_key] = None
@@ -142,15 +148,19 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
 
     file_signature = hashlib.sha256(file_bytes).hexdigest()
 
-    if st.session_state.get(upload_key) == file_signature:
+    processing_signature = f"{file_signature}:{use_ocr}"
+    if st.session_state.get(upload_key) == processing_signature:
         return
 
     clear_pair_results()
     st.session_state.input_error = None
     st.session_state[error_key] = None
     try:
-        st.session_state[text_key] = extract_text(uploaded_file)
-        st.session_state[upload_key] = file_signature
+        st.session_state[text_key] = extract_text(
+            uploaded_file,
+            use_ocr=use_ocr,
+        )
+        st.session_state[upload_key] = processing_signature
     except (
         UnicodeDecodeError,
         ValueError,
@@ -161,7 +171,7 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
         OcrError,
     ) as error:
         st.session_state[text_key] = ""
-        st.session_state[upload_key] = file_signature
+        st.session_state[upload_key] = processing_signature
         st.session_state[error_key] = str(error)
 
 
@@ -195,17 +205,18 @@ def compare_assignments():
         st.session_state.input_error = str(error)
 
 
-def collection_signature(uploaded_files):
+def collection_signature(uploaded_files, use_ocr=False):
     digest = hashlib.sha256()
+    digest.update(str(use_ocr).encode("ascii"))
     for uploaded_file in sorted(uploaded_files, key=lambda file: file.name):
         digest.update(uploaded_file.name.encode("utf-8"))
         digest.update(uploaded_file.getvalue())
     return digest.hexdigest()
 
 
-def sync_upload_mode(uploaded_files):
+def sync_upload_mode(uploaded_files, use_ocr=False):
     mode = upload_mode(len(uploaded_files))
-    signature = collection_signature(uploaded_files)
+    signature = collection_signature(uploaded_files, use_ocr=use_ocr)
     previous_mode = st.session_state.get("upload_mode")
     previous_signature = st.session_state.get("upload_signature")
 
@@ -240,7 +251,11 @@ def unique_document_name(name, existing_names):
     return candidate
 
 
-def extract_documents(uploaded_files, progress_callback=None):
+def extract_documents(
+    uploaded_files,
+    progress_callback=None,
+    use_ocr=False,
+):
     documents = {}
     errors = []
 
@@ -256,7 +271,7 @@ def extract_documents(uploaded_files, progress_callback=None):
                 progress_callback(index / total_files, uploaded_file.name)
             continue
         try:
-            text = extract_text(uploaded_file)
+            text = extract_text(uploaded_file, use_ocr=use_ocr)
         except (
             UnicodeDecodeError,
             ValueError,
@@ -374,7 +389,7 @@ def render_pair_result(match, show_highlighting):
         render_pair_content(match, show_highlighting)
 
 
-def render_two_assignment_mode(uploaded_files):
+def render_two_assignment_mode(uploaded_files, use_ocr=False):
     uploaded_a, uploaded_b = uploaded_files
     upload_progress = st.progress(
         0,
@@ -385,6 +400,7 @@ def render_two_assignment_mode(uploaded_files):
         "assignment_a",
         "assignment_a_upload_signature",
         "assignment_a_error",
+        use_ocr=use_ocr,
     )
     upload_progress.progress(
         0.5,
@@ -395,6 +411,7 @@ def render_two_assignment_mode(uploaded_files):
         "assignment_b",
         "assignment_b_upload_signature",
         "assignment_b_error",
+        use_ocr=use_ocr,
     )
     upload_progress.progress(1.0, text="Finished reading uploaded files.")
     upload_progress.empty()
@@ -504,8 +521,8 @@ def render_two_assignment_mode(uploaded_files):
     for match in matches:
         render_pair_result(match, show_highlighting)
 
-def render_collection_mode(uploaded_files):
-    signature = collection_signature(uploaded_files)
+def render_collection_mode(uploaded_files, use_ocr=False):
+    signature = collection_signature(uploaded_files, use_ocr=use_ocr)
     if signature != st.session_state.collection_signature:
         upload_progress = st.progress(
             0,
@@ -525,6 +542,7 @@ def render_collection_mode(uploaded_files):
         documents, errors = extract_documents(
             uploaded_files,
             progress_callback=update_upload_progress,
+            use_ocr=use_ocr,
         )
         upload_progress.progress(
             1.0,
@@ -1008,11 +1026,20 @@ uploaded_files = st.file_uploader(
         "common image files."
     ),
 )
+use_ocr = st.checkbox(
+    "Enable OCR for scanned PDFs and image files",
+    key="use_ocr",
+    help=(
+        "When enabled, scanned PDF pages, embedded DOCX images, and image "
+        "files are processed with OCR. Normal text extraction is always used "
+        "when available."
+    ),
+)
 
 if len(uploaded_files) > MAX_ASSIGNMENTS:
     st.error("Please upload no more than 50 assignments.")
 else:
-    sync_upload_mode(uploaded_files)
+    sync_upload_mode(uploaded_files, use_ocr=use_ocr)
     pair_tab, collection_tab, groups_tab, clustering_tab, semantic_tab, evaluation_tab = st.tabs([
         "Pair Comparison",
         "Collection Analysis",
@@ -1023,12 +1050,12 @@ else:
     ])
     with pair_tab:
         if len(uploaded_files) == 2:
-            render_two_assignment_mode(uploaded_files)
+            render_two_assignment_mode(uploaded_files, use_ocr=use_ocr)
         else:
             st.info("Upload exactly two files to use Pair Comparison.")
     with collection_tab:
         if len(uploaded_files) >= 3:
-            render_collection_mode(uploaded_files)
+            render_collection_mode(uploaded_files, use_ocr=use_ocr)
         else:
             st.info("Upload three to fifty files to use Collection Analysis.")
     with groups_tab:

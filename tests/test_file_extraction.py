@@ -39,4 +39,4 @@ def test_image_text_is_extracted_with_ocr(monkeypatch):
     monkeypatch.setattr(file_extraction.Image, "open", lambda data: object())
     uploaded = SimpleNamespace(name="scan.png", getvalue=lambda: b"image bytes")
 
-    assert extract_text(uploaded) == "OCR text"
+    assert extract_text(uploaded, use_ocr=True) == "OCR text"
