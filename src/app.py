@@ -13,7 +13,7 @@ from collection_similarity import (
     compare_document_collection,
     find_similarity_groups,
 )
-from file_extraction import SUPPORTED_FILE_TYPES, extract_text
+from file_extraction import OcrError, SUPPORTED_FILE_TYPES, extract_text
 from lexical_semantic import compare_lexical_and_semantic
 from evaluate_models import load_dataset, run_evaluation
 from pypdf.errors import FileNotDecryptedError, PdfReadError
@@ -33,7 +33,8 @@ HIGHLIGHT_COLORS = (
     "#f1c0e8",
 )
 MAX_ASSIGNMENTS = 50
-MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
+MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024
+MAX_FILE_SIZE_LABEL = "20 MB"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EVALUATION_DATASET = PROJECT_ROOT / "docs" / "test_pairs.csv"
 EVALUATION_OUTPUT = PROJECT_ROOT / "docs" / "evaluation"
@@ -128,15 +129,15 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
 
     file_bytes = uploaded_file.getvalue()
     if len(file_bytes) > MAX_FILE_SIZE_BYTES:
+        error_message = (
+            f"'{uploaded_file.name}' is larger than {MAX_FILE_SIZE_LABEL}. "
+            "Please choose a smaller file."
+        )
         st.session_state[text_key] = ""
         st.session_state[upload_key] = None
-        st.session_state[error_key] = (
-            f"'{uploaded_file.name}' is larger than 10 MB."
-        )
+        st.session_state[error_key] = error_message
         clear_pair_results()
-        st.session_state.input_error = (
-            f"'{uploaded_file.name}' is larger than 10 MB."
-        )
+        st.session_state.input_error = error_message
         return
 
     file_signature = hashlib.sha256(file_bytes).hexdigest()
@@ -157,6 +158,7 @@ def sync_uploaded_file(uploaded_file, text_key, upload_key, error_key):
         FileNotDecryptedError,
         PdfReadError,
         PackageNotFoundError,
+        OcrError,
     ) as error:
         st.session_state[text_key] = ""
         st.session_state[upload_key] = file_signature
@@ -238,14 +240,20 @@ def unique_document_name(name, existing_names):
     return candidate
 
 
-def extract_documents(uploaded_files):
+def extract_documents(uploaded_files, progress_callback=None):
     documents = {}
     errors = []
 
-    for uploaded_file in uploaded_files:
+    total_files = len(uploaded_files)
+    for index, uploaded_file in enumerate(uploaded_files, start=1):
         name = unique_document_name(uploaded_file.name, documents)
         if uploaded_file.size > MAX_FILE_SIZE_BYTES:
-            errors.append(f"{uploaded_file.name}: file is larger than 10 MB.")
+            errors.append(
+                f"{uploaded_file.name}: file is larger than "
+                f"{MAX_FILE_SIZE_LABEL}. Please choose a smaller file."
+            )
+            if progress_callback:
+                progress_callback(index / total_files, uploaded_file.name)
             continue
         try:
             text = extract_text(uploaded_file)
@@ -256,17 +264,21 @@ def extract_documents(uploaded_files):
             FileNotDecryptedError,
             PdfReadError,
             PackageNotFoundError,
+            OcrError,
         ) as error:
             errors.append(f"{uploaded_file.name}: {error}")
+            if progress_callback:
+                progress_callback(index / total_files, uploaded_file.name)
             continue
 
         if not text.strip():
             errors.append(
                 f"{uploaded_file.name}: no readable text was found."
             )
-            continue
-
-        documents[name] = text
+        else:
+            documents[name] = text
+        if progress_callback:
+            progress_callback(index / total_files, uploaded_file.name)
 
     return documents, errors
 
@@ -364,11 +376,19 @@ def render_pair_result(match, show_highlighting):
 
 def render_two_assignment_mode(uploaded_files):
     uploaded_a, uploaded_b = uploaded_files
+    upload_progress = st.progress(
+        0,
+        text="Reading uploaded files (1 of 2)...",
+    )
     sync_uploaded_file(
         uploaded_a,
         "assignment_a",
         "assignment_a_upload_signature",
         "assignment_a_error",
+    )
+    upload_progress.progress(
+        0.5,
+        text="Reading uploaded files (2 of 2)...",
     )
     sync_uploaded_file(
         uploaded_b,
@@ -376,6 +396,8 @@ def render_two_assignment_mode(uploaded_files):
         "assignment_b_upload_signature",
         "assignment_b_error",
     )
+    upload_progress.progress(1.0, text="Finished reading uploaded files.")
+    upload_progress.empty()
 
     both_uploaded = bool(
         st.session_state.assignment_a.strip()
@@ -389,7 +411,18 @@ def render_two_assignment_mode(uploaded_files):
         for error in errors:
             if error:
                 st.error(error)
+        st.info(
+            "The Compare assignments button becomes available after both "
+            f"files are readable and no larger than {MAX_FILE_SIZE_LABEL}."
+        )
         return
+
+    if (
+        st.session_state.results is None
+        and not st.session_state.input_error
+    ):
+        with st.spinner("Comparing assignment paragraphs..."):
+            compare_assignments()
 
     st.markdown("### Pair Comparison")
     st.caption(
@@ -474,7 +507,30 @@ def render_two_assignment_mode(uploaded_files):
 def render_collection_mode(uploaded_files):
     signature = collection_signature(uploaded_files)
     if signature != st.session_state.collection_signature:
-        documents, errors = extract_documents(uploaded_files)
+        upload_progress = st.progress(
+            0,
+            text=f"Reading uploaded files (0 of {len(uploaded_files)})...",
+        )
+
+        def update_upload_progress(progress, filename):
+            upload_progress.progress(
+                progress,
+                text=(
+                    f"Reading uploaded files "
+                    f"({round(progress * len(uploaded_files))} of "
+                    f"{len(uploaded_files)}): {filename}"
+                ),
+            )
+
+        documents, errors = extract_documents(
+            uploaded_files,
+            progress_callback=update_upload_progress,
+        )
+        upload_progress.progress(
+            1.0,
+            text="Finished reading uploaded files.",
+        )
+        upload_progress.empty()
         st.session_state.collection_signature = signature
         st.session_state.collection_documents = documents
         st.session_state.collection_errors = errors
@@ -904,7 +960,8 @@ with st.expander("How it works", expanded=False):
 st.markdown("### Upload assignments")
 st.caption(
     "Use exactly 2 files for Pair Comparison, or 3–50 files for Collection "
-    "Analysis. Supported formats: TXT, PDF, and DOCX. Each file is limited "
+    "Analysis. Supported formats: TXT, PDF, DOCX, and common image files. "
+    "Each file is limited "
     "to 10 MB."
 )
 
@@ -947,7 +1004,8 @@ uploaded_files = st.file_uploader(
     key="assignment_uploads",
     help=(
         "Upload exactly 2 files for paragraph comparison, or 3–50 files "
-        "for collection analysis. Supported formats: TXT, PDF, and DOCX."
+        "for collection analysis. Supported formats: TXT, PDF, DOCX, and "
+        "common image files."
     ),
 )
 

@@ -3,7 +3,7 @@
 A Streamlit application that compares uploaded assignments paragraph by
 paragraph and identifies pairs and groups with similar content.
 
-Upload TXT, PDF, or DOCX files, inspect lexical and semantic similarity, and
+Upload TXT, PDF, DOCX, or image files, inspect lexical and semantic similarity, and
 prioritize passages for human review. Similarity scores are not plagiarism
 probabilities or disciplinary decisions.
 
@@ -72,7 +72,7 @@ automatically, visit the local URL shown in the terminal.
 
 ## Usage
 
-1. Upload `TXT`, `PDF`, or `DOCX` files using the single upload area.
+1. Upload `TXT`, `PDF`, `DOCX`, or common image files using the single upload area.
 2. Upload exactly two files for a detailed paragraph comparison, or upload
    three to fifty files for collection analysis.
 3. Click **Compare assignments** after the files are successfully read.
@@ -165,13 +165,15 @@ similarity, and each assignment's closest member.
 ## Supported files
 
 - **TXT**: Read as UTF-8 text.
-- **PDF**: Text is extracted from each page. Scanned PDFs that contain only
-  images require OCR and are not supported. Password-protected PDFs are not
-  supported.
-- **DOCX**: Text is extracted from document paragraphs and table rows.
+- **PDF**: Text is extracted from each page. Scanned or image-only PDFs are
+  rendered and read with OCR. Password-protected PDFs are not supported.
+- **DOCX**: Text is extracted from document paragraphs and table rows. Embedded
+  images are also read with OCR.
+- **Images**: PNG, JPG, JPEG, BMP, TIF, and TIFF images are read with OCR.
 
-Legacy `.doc` files are not supported. Save Word documents as `.docx` before
-uploading them.
+OCR requires the Tesseract executable to be installed and available on the
+system `PATH`. Legacy `.doc` files are not supported. Save Word documents as
+`.docx` before uploading them.
 
 ## How similarity is calculated
 

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import pytest
 from pypdf.errors import PdfReadError
 
+import file_extraction
 from file_extraction import extract_text
 
 
@@ -31,3 +32,11 @@ def test_invalid_docx_is_reported():
     uploaded = SimpleNamespace(name="broken.docx", getvalue=lambda: b"not docx")
     with pytest.raises(ValueError, match="corrupt|valid Word"):
         extract_text(uploaded)
+
+
+def test_image_text_is_extracted_with_ocr(monkeypatch):
+    monkeypatch.setattr(file_extraction, "_ocr_image", lambda image: "OCR text")
+    monkeypatch.setattr(file_extraction.Image, "open", lambda data: object())
+    uploaded = SimpleNamespace(name="scan.png", getvalue=lambda: b"image bytes")
+
+    assert extract_text(uploaded) == "OCR text"
