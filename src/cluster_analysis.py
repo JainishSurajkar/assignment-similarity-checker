@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import silhouette_score
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -54,6 +55,20 @@ def cluster_documents(documents, similarity_threshold=55):
         distance_threshold=distance_threshold,
     )
     labels = model.fit_predict(distances)
+    cluster_count = len(set(labels))
+    if 1 < cluster_count < len(names):
+        try:
+            quality_score = float(
+                silhouette_score(
+                    distances,
+                    labels,
+                    metric="precomputed",
+                )
+            )
+        except ValueError:
+            quality_score = None
+    else:
+        quality_score = None
 
     similarity_df = pd.DataFrame(
         similarities * 100,
@@ -120,6 +135,11 @@ def cluster_documents(documents, similarity_threshold=55):
                 else "N/A"
             ),
             "Assignments": ", ".join(member_names),
+            "Silhouette score": (
+                round(quality_score, 3)
+                if quality_score is not None
+                else "N/A (undefined for this cluster layout)"
+            ),
         })
 
     assignments_df = pd.DataFrame(assignment_rows)

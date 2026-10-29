@@ -1,0 +1,9 @@
+Machine learning is a method in which a computer learns patterns from
+examples instead of receiving every rule explicitly. During training, the
+model studies data and adjusts its internal parameters. After training, it
+uses the learned patterns to make predictions about new observations.
+
+The quality of a machine learning system depends strongly on the quality and
+representativeness of its training data. Missing values, incorrect labels, or
+biased examples can lead to unreliable predictions even when the algorithm
+itself is well designed.

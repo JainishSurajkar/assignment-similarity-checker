@@ -61,6 +61,8 @@ def test_evaluation_metrics_include_confusion_counts():
     assert metrics["TN"] == 1
     assert metrics["FP"] == 1
     assert metrics["FN"] == 1
+    assert metrics["Accuracy"] == 0.5
+    assert metrics["Specificity"] == 0.5
 
 
 def test_invalid_split_is_rejected(tmp_path):
@@ -71,6 +73,18 @@ def test_invalid_split_is_rejected(tmp_path):
         encoding="utf-8",
     )
     with pytest.raises(ValueError, match="Invalid split"):
+        load_dataset(path)
+
+
+def test_duplicate_pair_ids_are_rejected(tmp_path):
+    path = tmp_path / "pairs.csv"
+    path.write_text(
+        "pair_id,text_a,text_b,label\n"
+        "P1,alpha text,beta text,1\n"
+        "P1,gamma text,delta text,0\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="pair_id"):
         load_dataset(path)
 
 

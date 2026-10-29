@@ -1,0 +1,22 @@
+Machine learning is used in education to support several activities, such as
+recommending practice questions and identifying students who may need help.
+These systems can save teachers time by summarizing patterns in student
+responses.
+
+Teachers should not treat a prediction as a final academic decision. Human
+review is necessary because a student's performance may be affected by
+circumstances that are not represented in the available data.
+Cosine similarity compares the angle between two vectors rather than their
+length. In a text mining system, TF-IDF gives a document a weighted coordinate
+for each term. Two assignments about the same topic can therefore receive a
+moderate score even when they explain different ideas and use different
+examples.
+
+An evaluation should compare predictions with labelled pairs. Precision
+describes how many predicted matches are relevant, while recall describes how
+many relevant pairs were found. A validation split can select a threshold,
+but the test split should remain untouched until the final measurement.
+
+These concepts are related to the demonstration application, but a score is
+not a probability that copying occurred. A faculty reviewer must consider
+prompts, references, standard terminology, and the surrounding context.

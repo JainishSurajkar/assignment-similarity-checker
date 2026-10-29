@@ -1,0 +1,20 @@
+A machine learning project usually includes data collection, model training,
+and evaluation. The final report should describe the chosen method and the
+measures used to assess its performance.
+
+Different algorithms may produce different results on the same dataset.
+Therefore, experiments should be documented carefully so that the findings
+can be interpreted and reproduced.
+Clustering organizes observations without requiring a target label. In
+hierarchical clustering, documents begin as separate items and nearby items
+are merged according to a distance rule. A dendrogram can be cut at a chosen
+distance to obtain a practical set of groups.
+
+For text documents, cosine distance between TF-IDF vectors is an interpretable
+choice. Important terms can summarize a group, but a cluster threshold does
+not guarantee that every pair inside a connected group is directly similar.
+The silhouette score can describe separation when its mathematical
+requirements are met; it is undefined for one cluster or for all singletons.
+
+Clustering is exploratory. The resulting groups should be discussed with
+subject knowledge rather than presented as objectively correct categories.

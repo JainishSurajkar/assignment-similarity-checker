@@ -1,0 +1,16 @@
+Data preprocessing is the stage where raw observations are converted into a
+form that an algorithm can use. A practical pipeline can remove duplicate
+rows, repair missing values, standardize numeric columns, and encode
+categorical values. The order matters because a later transformation should
+not accidentally use information that belongs only to a test split.
+
+For an assignment similarity project, preprocessing also applies to text.
+Line endings and unnecessary whitespace are normalized while blank lines remain
+paragraph boundaries. The resulting paragraphs are converted to TF-IDF
+vectors, so common words receive less weight than words that distinguish one
+document from another.
+
+The final model should be checked on data that was not used while fitting the
+preprocessing steps. This separation makes the evaluation more credible,
+although a small synthetic benchmark cannot establish performance on real
+student work.

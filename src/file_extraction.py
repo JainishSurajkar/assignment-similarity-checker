@@ -85,11 +85,16 @@ def _extract_docx_text(document, use_ocr):
                 blocks.append(" | ".join(cells))
     if use_ocr:
         for shape in document.inline_shapes:
-            relationship_id = (
-                shape._inline.graphic.graphicData.pic.pic.blipFill.blip.embed
-            )
-            image_part = document.part.related_parts[relationship_id]
-            image = Image.open(BytesIO(image_part.blob))
+            try:
+                relationship_id = (
+                    shape._inline.graphic.graphicData.pic.pic.blipFill.blip.embed
+                )
+                image_part = document.part.related_parts[relationship_id]
+                image = Image.open(BytesIO(image_part.blob))
+            except (AttributeError, KeyError, OSError, ValueError) as error:
+                raise ValueError(
+                    "An embedded DOCX image could not be read for OCR."
+                ) from error
             text = _ocr_image(image)
             if text:
                 blocks.append(text)
@@ -115,15 +120,15 @@ def extract_text(uploaded_file, use_ocr=False) -> str:
                 "Remove the password or export an unprotected copy."
             )
         pages = [page.extract_text() or "" for page in reader.pages]
-        text_pages = [page.strip() for page in pages if page.strip()]
+        if not pages:
+            raise ValueError("This PDF contains no pages.")
         missing_page_indexes = [
             index for index, page in enumerate(pages) if not page.strip()
         ]
         if missing_page_indexes and use_ocr:
-            ocr_text = _ocr_pdf(file_bytes, missing_page_indexes)
-            if ocr_text:
-                text_pages.append(ocr_text)
-        text = "\n\n".join(text_pages)
+            for index in missing_page_indexes:
+                pages[index] = _ocr_pdf(file_bytes, [index])
+        text = "\n\n".join(page.strip() for page in pages if page.strip())
         if not text.strip():
             if not use_ocr:
                 raise ValueError(
@@ -131,6 +136,11 @@ def extract_text(uploaded_file, use_ocr=False) -> str:
                     "the OCR option to read scanned pages."
                 )
             raise ValueError("This PDF contains no readable text.")
+        if missing_page_indexes and not use_ocr:
+            text += (
+                "\n\n[Warning: one or more PDF pages had no extractable text. "
+                "Enable OCR to include scanned pages.]"
+            )
         return text
 
     if extension == ".docx":

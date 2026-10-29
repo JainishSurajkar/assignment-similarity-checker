@@ -3,3 +3,6 @@ __pycache__/
 *.py[cod]
 .env
 docs/evaluation/
+sample_data/*
+!sample_data/demo/
+!sample_data/demo/*.txt

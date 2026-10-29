@@ -34,7 +34,9 @@ HIGHLIGHT_COLORS = (
 )
 MAX_ASSIGNMENTS = 50
 MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024
-MAX_FILE_SIZE_LABEL = "20 MB"
+MAX_FILE_SIZE_LABEL = "20 MiB"
+MAX_COLLECTION_SIZE_BYTES = 200 * 1024 * 1024
+MAX_COLLECTION_SIZE_LABEL = "200 MB"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EVALUATION_DATASET = PROJECT_ROOT / "docs" / "test_pairs.csv"
 EVALUATION_OUTPUT = PROJECT_ROOT / "docs" / "evaluation"
@@ -212,6 +214,19 @@ def collection_signature(uploaded_files, use_ocr=False):
         digest.update(uploaded_file.name.encode("utf-8"))
         digest.update(uploaded_file.getvalue())
     return digest.hexdigest()
+
+
+def upload_limit_error(uploaded_files):
+    """Return a user-facing error when collection upload limits are exceeded."""
+    if len(uploaded_files) > MAX_ASSIGNMENTS:
+        return "Please upload no more than 50 assignments."
+    total_size = sum(file.size for file in uploaded_files)
+    if total_size > MAX_COLLECTION_SIZE_BYTES:
+        return (
+            f"These files total more than {MAX_COLLECTION_SIZE_LABEL}. "
+            "Remove some files before processing the collection."
+        )
+    return None
 
 
 def sync_upload_mode(uploaded_files, use_ocr=False):
@@ -433,13 +448,6 @@ def render_two_assignment_mode(uploaded_files, use_ocr=False):
             f"files are readable and no larger than {MAX_FILE_SIZE_LABEL}."
         )
         return
-
-    if (
-        st.session_state.results is None
-        and not st.session_state.input_error
-    ):
-        with st.spinner("Comparing assignment paragraphs..."):
-            compare_assignments()
 
     st.markdown("### Pair Comparison")
     st.caption(
@@ -980,7 +988,8 @@ st.caption(
     "Use exactly 2 files for Pair Comparison, or 3–50 files for Collection "
     "Analysis. Supported formats: TXT, PDF, DOCX, and common image files. "
     "Each file is limited "
-    "to 10 MB."
+    f"to {MAX_FILE_SIZE_LABEL}."
+    " The total collection is limited to 200 MB."
 )
 
 for key, default in (
@@ -1036,8 +1045,11 @@ use_ocr = st.checkbox(
     ),
 )
 
-if len(uploaded_files) > MAX_ASSIGNMENTS:
-    st.error("Please upload no more than 50 assignments.")
+upload_error = upload_limit_error(uploaded_files)
+if upload_error:
+    clear_pair_results()
+    clear_collection_results()
+    st.error(upload_error)
 else:
     sync_upload_mode(uploaded_files, use_ocr=use_ocr)
     pair_tab, collection_tab, groups_tab, clustering_tab, semantic_tab, evaluation_tab = st.tabs([

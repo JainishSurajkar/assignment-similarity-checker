@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
     confusion_matrix,
     f1_score,
     precision_score,
@@ -34,6 +36,8 @@ def load_dataset(path=DEFAULT_DATASET):
     dataframe = dataframe.dropna(subset=REQUIRED_COLUMNS).copy()
     if dataframe.empty:
         raise ValueError("The dataset contains no valid pairs.")
+    if dataframe["pair_id"].astype(str).duplicated().any():
+        raise ValueError("pair_id values must be unique.")
     if not dataframe["label"].isin([0, 1]).all():
         raise ValueError("Labels must be either 0 or 1.")
     if (
@@ -54,6 +58,16 @@ def load_dataset(path=DEFAULT_DATASET):
             raise ValueError(
                 f"Invalid split values: {invalid_splits}. Use train, "
                 "validation, or test."
+            )
+        split_labels = dataframe.groupby("split")["label"].nunique()
+        incomplete_splits = sorted(
+            split for split in valid_splits
+            if split in split_labels and split_labels[split] < 2
+        )
+        if incomplete_splits:
+            raise ValueError(
+                "Each evaluation split must contain both label classes; "
+                f"incomplete split(s): {incomplete_splits}."
             )
     return dataframe
 
@@ -132,6 +146,14 @@ def evaluate_threshold(dataframe, score_column, threshold):
         "Precision": precision_score(y_true, y_pred, zero_division=0),
         "Recall": recall_score(y_true, y_pred, zero_division=0),
         "F1-score": f1_score(y_true, y_pred, zero_division=0),
+        "Accuracy": accuracy_score(y_true, y_pred),
+        "Specificity": recall_score(
+            y_true,
+            y_pred,
+            pos_label=0,
+            zero_division=0,
+        ),
+        "Balanced accuracy": balanced_accuracy_score(y_true, y_pred),
         "TN": int(tn),
         "FP": int(fp),
         "FN": int(fn),

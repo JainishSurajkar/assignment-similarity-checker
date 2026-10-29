@@ -1,0 +1,14 @@
+Before mining a dataset, raw records need to be prepared for analysis. A
+useful preparation workflow removes repeated records, deals with absent
+values, scales numerical features, and represents categories numerically.
+Transformations must be fitted using the training portion so information from
+the test portion does not leak into the experiment.
+
+Text needs a similar preparation step. We clean line endings and excess spaces
+but retain empty lines as paragraph separators. Each paragraph is then
+represented by TF-IDF weights. Terms appearing everywhere carry less
+importance, while distinctive terms help separate one document from another.
+
+An honest experiment keeps a final set of examples aside until the model is
+finished. Results on a small artificial collection are useful for a classroom
+demonstration, but they are not evidence about actual student submissions.

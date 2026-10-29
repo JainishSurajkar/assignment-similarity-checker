@@ -34,8 +34,9 @@ probabilities or disciplinary decisions.
 
 ## Requirements
 
-- Python 3.10 or newer
+- Python 3.10–3.13 (the checked environment uses Python 3.12)
 - The packages listed in [`requirements.txt`](./requirements.txt)
+- Tesseract OCR is optional and is required only for scanned PDFs and images.
 
 ## Installation
 
@@ -58,6 +59,11 @@ probabilities or disciplinary decisions.
    ```powershell
    pip install -r requirements.txt
    ```
+
+On Unix-like systems, activate with `source .venv/bin/activate`. Verify an
+OCR installation with `tesseract --version`. Windows users can install the
+official Tesseract build; macOS users can use `brew install tesseract`, and
+Debian/Ubuntu users can use `sudo apt install tesseract-ocr`.
 
 ## Running the application
 
@@ -271,10 +277,6 @@ separately from uploaded assignments.
 
 ![Model Evaluation tab](./screenshots/model-evaluation.png)
 
-The original application home-screen capture is also preserved:
-
-![Assignment Similarity Checker home screen](./docs/app-home.png)
-
 ## Limitations
 
 Similarity scores prioritize passages for human review; they do not prove
@@ -285,8 +287,9 @@ larger than the original six examples but contains illustrative labels rather
 than verified domain annotations, so its metrics are not a reliable claim of
 production accuracy. Replace or expand it with genuinely reviewed pairs before
 presenting performance results.
-Scanned PDFs require OCR, which is not implemented, and long paragraphs may
-be truncated by the embedding model.
+Scanned PDFs and image uploads require the optional Tesseract executable. OCR
+is implemented, but can fail when Tesseract is missing or the image is
+unreadable. Long paragraphs may be truncated by the embedding model.
 
 ## Testing
 
@@ -330,9 +333,10 @@ assignment-similarity-checker/
   files remain and **Compare assignment collection** is clicked.
 - Empty or unreadable assignments are not compared.
 - Similarity scores are displayed as percentages.
-- Individual uploads are limited to 10 MB.
+- Individual uploads are limited to 20 MiB; a collection is limited to 200 MB.
 - Collection results can be downloaded as a CSV file.
-- The evaluation starter dataset contains 60 labelled examples across
-  train/validation/test splits and should continue to grow with manually
-  reviewed domain-specific pairs.
+- The evaluation starter dataset contains 60 illustrative labelled examples
+(36 train, 12 validation, 12 test) across train/validation/test splits. It is
+not a human-validated estimate of real-world accuracy and should be expanded
+with reviewed domain-specific pairs.
 - The `.venv` directory is ignored and should not be committed to Git.
