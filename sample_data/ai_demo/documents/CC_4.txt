@@ -1,0 +1,7 @@
+With cloud computing, organisations obtain technology services through a network instead of operating every computing component themselves. Processing power, storage, databases, and complete software products can be provisioned from a provider. Capacity may be adjusted as demand changes.
+
+The main service categories describe how much the provider manages. IaaS supplies fundamental infrastructure such as virtual machines and networks. PaaS gives developers a managed platform for application development and deployment. SaaS makes a finished application available to its users.
+
+A public cloud offers services on shared provider infrastructure. A private cloud is reserved for a particular organisation, and a hybrid design combines private and public environments. The appropriate arrangement depends on workload, governance, and information sensitivity.
+
+Potential advantages include rapid provisioning, flexible capacity, and reduced need to operate physical equipment. Nevertheless, customers must still manage identities, encryption, backup arrangements, location requirements, and configuration. Provider interruptions and dependence on a vendor should be considered. Spending also needs oversight because idle services and network transfers may increase bills.

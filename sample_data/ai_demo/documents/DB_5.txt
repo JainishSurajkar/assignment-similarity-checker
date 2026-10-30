@@ -1,0 +1,5 @@
+Consider an online bookstore that needs to manage customers, books, orders, and payments. Staff need to find a customer's order, check stock, and record whether payment has been received. Keeping all details in one large spreadsheet would make updates difficult and could create inconsistent copies of the same information.
+
+A database application can provide separate screens for searching the catalogue, placing an order, and updating inventory. Business rules can prevent an order from referring to a book that does not exist. Reports can summarise sales by month or identify items that need replenishment.
+
+The system should be designed around the tasks users perform. Common searches may need indexes, and important operations should be protected by transactions. Different staff roles should receive only the permissions required for their work. Backups and recovery tests are necessary so that the business can continue after equipment failure.

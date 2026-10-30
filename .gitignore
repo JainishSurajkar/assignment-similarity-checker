@@ -4,5 +4,7 @@ __pycache__/
 .env
 docs/evaluation/
 sample_data/*
-!sample_data/demo/
-!sample_data/demo/*.txt
+!sample_data/ai_demo/
+sample_data/ai_demo/*
+!sample_data/ai_demo/documents/
+!sample_data/ai_demo/documents/**

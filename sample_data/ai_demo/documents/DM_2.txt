@@ -1,0 +1,7 @@
+Data mining is the process of discovering useful patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data mining task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.

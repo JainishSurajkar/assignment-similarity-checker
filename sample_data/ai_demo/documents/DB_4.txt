@@ -1,0 +1,7 @@
+A DBMS is an application that lets people create, organise, search, and maintain stored information. It supports reliable access for users and software while helping enforce rules about consistency and permissions. In a relational design, data is arranged into tables containing records and fields.
+
+Keys establish identity and relationships: a primary key distinguishes a row, and a foreign key refers to a row in another table. Normalisation separates information into suitable tables to limit repetition and modification problems. SQL provides commands for defining structures and querying or changing records.
+
+A transaction treats a group of operations as one logical action. ACID refers to atomicity, consistency, isolation, and durability. Index structures can improve retrieval speed, but they consume space and add work when records change. Their use should match the application's access patterns.
+
+Relational systems support services such as hospital records, financial applications, university administration, bookings, and online shopping. Reliable operation also depends on backups, recovery planning, authentication, authorisation, and protection against unauthorised disclosure.

@@ -1,0 +1,7 @@
+Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.

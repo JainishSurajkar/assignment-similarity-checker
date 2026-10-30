@@ -1,0 +1,5 @@
+A practical example of an intelligent system is a phone keyboard that suggests the next word while a person types. The software uses language patterns and context to rank possible suggestions. The user can accept a suggestion, ignore it, or continue typing, so the system assists rather than replaces the writer.
+
+Building such a feature involves collecting suitable text, representing words and context numerically, and learning which suggestions are likely in a given situation. The design must consider response time because a suggestion that appears too slowly is not useful. It should also handle uncommon names and multiple languages.
+
+Evaluation should include more than a single success percentage. Developers can measure how often the desired word appears among the top suggestions, how frequently suggestions are rejected, and whether performance differs across language groups. Training text should be handled responsibly because messages can contain private information.

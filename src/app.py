@@ -16,6 +16,10 @@ from collection_similarity import (
 from file_extraction import OcrError, SUPPORTED_FILE_TYPES, extract_text
 from lexical_semantic import compare_lexical_and_semantic
 from evaluate_models import load_dataset, run_evaluation
+from demo_dataset import (
+    discover_sample_files,
+    sample_dataset_signature,
+)
 from pypdf.errors import FileNotDecryptedError, PdfReadError
 from similarity import compare_paragraphs
 from upload_state import upload_mode, upload_state_changed
@@ -40,6 +44,7 @@ MAX_COLLECTION_SIZE_LABEL = "200 MB"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EVALUATION_DATASET = PROJECT_ROOT / "docs" / "test_pairs.csv"
 EVALUATION_OUTPUT = PROJECT_ROOT / "docs" / "evaluation"
+SAMPLE_DATASET_DIRECTORY = PROJECT_ROOT / "sample_data" / "ai_demo" / "documents"
 
 
 def shared_words(text_a, text_b):
@@ -313,6 +318,18 @@ def extract_documents(
     return documents, errors
 
 
+def load_sample_dataset(use_ocr=False):
+    """Discover and extract the repository's preloaded demonstration files."""
+    sample_files, discovery_errors = discover_sample_files(
+        SAMPLE_DATASET_DIRECTORY
+    )
+    documents, extraction_errors = extract_documents(
+        sample_files,
+        use_ocr=use_ocr,
+    )
+    return sample_files, documents, discovery_errors + extraction_errors
+
+
 def clear_collection_results():
     st.session_state.collection_signature = None
     st.session_state.collection_documents = {}
@@ -336,6 +353,40 @@ def clear_pair_results():
 def clear_semantic_results():
     st.session_state.lexical_semantic_results = None
     st.session_state.lexical_semantic_signature = None
+
+
+def select_pair_files(uploaded_files):
+    """Choose the two files used by Pair Comparison and semantic analysis."""
+    if len(uploaded_files) < 2:
+        return []
+    if len(uploaded_files) == 2:
+        return uploaded_files
+
+    file_names = [uploaded_file.name for uploaded_file in uploaded_files]
+    selection_columns = st.columns(2)
+    with selection_columns[0]:
+        assignment_a_name = st.selectbox(
+            "Pair assignment A",
+            file_names,
+            key="pair_assignment_a_name",
+        )
+    remaining_names = [
+        name for name in file_names if name != assignment_a_name
+    ]
+    with selection_columns[1]:
+        assignment_b_name = st.selectbox(
+            "Pair assignment B",
+            remaining_names,
+            index=min(1, len(remaining_names) - 1),
+            key="pair_assignment_b_name",
+        )
+    files_by_name = {
+        uploaded_file.name: uploaded_file for uploaded_file in uploaded_files
+    }
+    return [
+        files_by_name[assignment_a_name],
+        files_by_name[assignment_b_name],
+    ]
 
 
 def render_pair_content(match, show_highlighting=False):
@@ -404,30 +455,62 @@ def render_pair_result(match, show_highlighting):
         render_pair_content(match, show_highlighting)
 
 
-def render_two_assignment_mode(uploaded_files, use_ocr=False):
+def sync_preloaded_pair(selected_files, documents, dataset_signature):
+    """Populate pair state from already-extracted sample documents."""
+    for index, uploaded_file in enumerate(selected_files):
+        text_key = "assignment_a" if index == 0 else "assignment_b"
+        upload_key = (
+            "assignment_a_upload_signature"
+            if index == 0
+            else "assignment_b_upload_signature"
+        )
+        error_key = "assignment_a_error" if index == 0 else "assignment_b_error"
+        file_signature = f"{dataset_signature}:{uploaded_file.name}"
+        if st.session_state.get(upload_key) == file_signature:
+            continue
+        clear_pair_results()
+        st.session_state[text_key] = documents.get(uploaded_file.name, "")
+        st.session_state[upload_key] = file_signature
+        st.session_state[error_key] = None
+        st.session_state.input_error = None
+
+
+def render_two_assignment_mode(
+    uploaded_files,
+    use_ocr=False,
+    preloaded_documents=None,
+    dataset_signature=None,
+):
     uploaded_a, uploaded_b = uploaded_files
     upload_progress = st.progress(
         0,
         text="Reading uploaded files (1 of 2)...",
     )
-    sync_uploaded_file(
-        uploaded_a,
-        "assignment_a",
-        "assignment_a_upload_signature",
-        "assignment_a_error",
-        use_ocr=use_ocr,
-    )
-    upload_progress.progress(
-        0.5,
-        text="Reading uploaded files (2 of 2)...",
-    )
-    sync_uploaded_file(
-        uploaded_b,
-        "assignment_b",
-        "assignment_b_upload_signature",
-        "assignment_b_error",
-        use_ocr=use_ocr,
-    )
+    if preloaded_documents is not None:
+        sync_preloaded_pair(
+            uploaded_files,
+            preloaded_documents,
+            dataset_signature,
+        )
+    else:
+        sync_uploaded_file(
+            uploaded_a,
+            "assignment_a",
+            "assignment_a_upload_signature",
+            "assignment_a_error",
+            use_ocr=use_ocr,
+        )
+        upload_progress.progress(
+            0.5,
+            text="Reading uploaded files (2 of 2)...",
+        )
+        sync_uploaded_file(
+            uploaded_b,
+            "assignment_b",
+            "assignment_b_upload_signature",
+            "assignment_b_error",
+            use_ocr=use_ocr,
+        )
     upload_progress.progress(1.0, text="Finished reading uploaded files.")
     upload_progress.empty()
 
@@ -529,7 +612,12 @@ def render_two_assignment_mode(uploaded_files, use_ocr=False):
     for match in matches:
         render_pair_result(match, show_highlighting)
 
-def render_collection_mode(uploaded_files, use_ocr=False):
+def render_collection_mode(
+    uploaded_files,
+    use_ocr=False,
+    preloaded_documents=None,
+    preloaded_errors=None,
+):
     signature = collection_signature(uploaded_files, use_ocr=use_ocr)
     if signature != st.session_state.collection_signature:
         upload_progress = st.progress(
@@ -547,11 +635,15 @@ def render_collection_mode(uploaded_files, use_ocr=False):
                 ),
             )
 
-        documents, errors = extract_documents(
-            uploaded_files,
-            progress_callback=update_upload_progress,
-            use_ocr=use_ocr,
-        )
+        if preloaded_documents is not None:
+            documents = preloaded_documents
+            errors = preloaded_errors or []
+        else:
+            documents, errors = extract_documents(
+                uploaded_files,
+                progress_callback=update_upload_progress,
+                use_ocr=use_ocr,
+            )
         upload_progress.progress(
             1.0,
             text="Finished reading uploaded files.",
@@ -704,8 +796,8 @@ def render_connected_groups_tab():
     matrix = st.session_state.collection_matrix
     if matrix is None:
         st.info(
-            "Upload at least three assignments and run Collection Analysis "
-            "first."
+            "At least three assignments must be available. Run Collection "
+            "Analysis first."
         )
         return
     threshold = st.slider(
@@ -737,8 +829,8 @@ def render_clustering_tab():
     documents = st.session_state.collection_documents
     if len(documents) < 2:
         st.info(
-            "Upload at least three assignments and run Collection Analysis "
-            "first."
+            "At least two assignments must be available. Run Collection "
+            "Analysis first."
         )
         return
     threshold = st.slider(
@@ -859,9 +951,13 @@ def render_semantic_tab(uploaded_files):
         "meaning-related similarity from sentence embeddings. Neither score "
         "is a plagiarism probability."
     )
+    st.caption(
+        "The comparison button is active. The first run may take several "
+        "minutes while the embedding model is loaded or downloaded."
+    )
     signature = collection_signature(uploaded_files)
     if st.button(
-        "Run lexical and semantic comparison",
+        "Load model and run comparison",
         type="primary",
         key="semantic_tab_compare",
     ):
@@ -965,6 +1061,16 @@ st.markdown(
     .assignment-text mark {
         color: #1f2937 !important;
     }
+    [data-testid="stButton"] button[kind="primary"] {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+        color: #ffffff !important;
+    }
+    [data-testid="stButton"] button[kind="primary"]:hover {
+        background-color: #1d4ed8 !important;
+        border-color: #1d4ed8 !important;
+        color: #ffffff !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -1018,6 +1124,11 @@ for key, default in (
     ("lexical_semantic_signature", None),
     ("upload_mode", None),
     ("upload_signature", None),
+    ("dataset_choice", "Use Sample Dataset"),
+    ("sample_dataset_signature", None),
+    ("sample_dataset_files", []),
+    ("sample_dataset_documents", {}),
+    ("sample_dataset_errors", []),
     ("evaluation_metrics", None),
     ("evaluation_semantic_error", None),
 ):
@@ -1045,13 +1156,72 @@ use_ocr = st.checkbox(
     ),
 )
 
-upload_error = upload_limit_error(uploaded_files)
+current_sample_signature = sample_dataset_signature(
+    SAMPLE_DATASET_DIRECTORY,
+    use_ocr=use_ocr,
+)
+if st.session_state.sample_dataset_signature != current_sample_signature:
+    (
+        st.session_state.sample_dataset_files,
+        st.session_state.sample_dataset_documents,
+        st.session_state.sample_dataset_errors,
+    ) = load_sample_dataset(use_ocr=use_ocr)
+    st.session_state.sample_dataset_signature = current_sample_signature
+
+dataset_choice = st.segmented_control(
+    "Dataset",
+    ["Use Sample Dataset", "Use My Uploaded Files"],
+    key="dataset_choice",
+)
+if dataset_choice is None:
+    dataset_choice = "Use Sample Dataset"
+
+using_sample_dataset = dataset_choice == "Use Sample Dataset"
+if using_sample_dataset:
+    active_files = [
+        uploaded_file
+        for uploaded_file in st.session_state.sample_dataset_files
+        if uploaded_file.name in st.session_state.sample_dataset_documents
+    ]
+    active_documents = st.session_state.sample_dataset_documents
+    active_errors = st.session_state.sample_dataset_errors
+    st.info(
+        "Demo Dataset Loaded — Sample assignments are already available. "
+        "You can explore the analysis immediately or upload your own "
+        "assignments."
+    )
+    st.caption(
+        f"{len(active_files)} sample file(s) loaded successfully. "
+        "They are kept separate from your uploaded files."
+    )
+    with st.expander("View sample dataset files", expanded=False):
+        if active_files:
+            st.write(", ".join(file.name for file in active_files))
+        else:
+            st.warning("No sample files could be loaded.")
+        for error in active_errors:
+            st.warning(error)
+else:
+    active_files = uploaded_files
+    active_documents = None
+    active_errors = []
+    st.info(
+        "Using My Uploaded Files. Select **Use Sample Dataset** to return "
+        "to the preloaded assignments."
+    )
+
+upload_error = (
+    upload_limit_error(uploaded_files)
+    if not using_sample_dataset
+    else None
+)
 if upload_error:
     clear_pair_results()
     clear_collection_results()
     st.error(upload_error)
 else:
-    sync_upload_mode(uploaded_files, use_ocr=use_ocr)
+    sync_upload_mode(active_files, use_ocr=use_ocr)
+    pair_files = select_pair_files(active_files)
     pair_tab, collection_tab, groups_tab, clustering_tab, semantic_tab, evaluation_tab = st.tabs([
         "Pair Comparison",
         "Collection Analysis",
@@ -1061,13 +1231,23 @@ else:
         "Model Evaluation",
     ])
     with pair_tab:
-        if len(uploaded_files) == 2:
-            render_two_assignment_mode(uploaded_files, use_ocr=use_ocr)
+        if len(pair_files) == 2:
+            render_two_assignment_mode(
+                pair_files,
+                use_ocr=use_ocr,
+                preloaded_documents=active_documents,
+                dataset_signature=st.session_state.sample_dataset_signature,
+            )
         else:
             st.info("Upload exactly two files to use Pair Comparison.")
     with collection_tab:
-        if len(uploaded_files) >= 3:
-            render_collection_mode(uploaded_files, use_ocr=use_ocr)
+        if len(active_files) >= 3:
+            render_collection_mode(
+                active_files,
+                use_ocr=use_ocr,
+                preloaded_documents=active_documents,
+                preloaded_errors=active_errors,
+            )
         else:
             st.info("Upload three to fifty files to use Collection Analysis.")
     with groups_tab:
@@ -1075,6 +1255,6 @@ else:
     with clustering_tab:
         render_clustering_tab()
     with semantic_tab:
-        render_semantic_tab(uploaded_files)
+        render_semantic_tab(pair_files)
     with evaluation_tab:
         render_evaluation_tab()

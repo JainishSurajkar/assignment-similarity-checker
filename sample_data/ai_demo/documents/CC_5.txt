@@ -1,0 +1,5 @@
+A small company launching a seasonal shopping website may experience large changes in visitor traffic. Buying enough physical servers for the busiest day could leave expensive equipment unused for much of the year. Renting computing capacity can make it easier to respond to demand without owning every machine.
+
+The company still has to design its application, protect customer information, monitor performance, and plan for service interruptions. A cloud provider operates much of the underlying infrastructure, but the customer remains responsible for many configuration choices. Poorly protected storage or exposed credentials can still cause a security incident.
+
+A sensible adoption plan estimates normal and peak usage, identifies information that needs special protection, and compares expected costs. Teams should test backups and recovery procedures before relying on the service. Cloud migration is therefore a business and operational decision, not simply moving files to another computer.

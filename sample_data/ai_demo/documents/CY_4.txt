@@ -1,0 +1,7 @@
+The goal of cybersecurity is to keep digital systems and their information safe from misuse, unauthorised changes, and interruption. Three widely used objectives are confidentiality, integrity, and availability. They mean that information is seen only by permitted people, remains accurate, and can be accessed when required.
+
+Threats can take the form of deceptive emails, harmful software, extortion attacks, stolen passwords, or weaknesses in applications. An attacker might persuade a user to disclose login details or exploit an unpatched service. Updating software, enabling more than one authentication factor, and teaching users to recognise suspicious activity can lower risk.
+
+Defence usually combines several controls. Network filters regulate connections, device security tools watch endpoints, encryption protects information, and permissions limit access. Copies of important data make restoration possible after failures or malicious encryption. Monitoring can reveal unusual behaviour and should be supported by an incident-handling process.
+
+Security needs continuous attention. Risk reviews identify valuable assets and likely dangers. Response plans describe how to recognise an incident, limit its impact, investigate it, and restore operations. Staff awareness, privacy protection, and regular reassessment are as important as technical products.

@@ -1,0 +1,7 @@
+In machine learning, a computer program improves its task performance by learning regularities from examples. Rather than specifying every decision as a fixed rule, developers train a model on data so it can respond to previously unseen cases. Results are strongly affected by whether the examples are relevant, sufficient, and trustworthy.
+
+Learning with labelled examples is called supervised learning. It includes classification, which chooses a category such as spam or not spam, and regression, which estimates a quantity such as a property's value. Unsupervised methods work without target answers; clustering can reveal groups within the observations.
+
+A normal workflow gathers and prepares data, separates examples for training and testing, chooses a method, fits its parameters, and measures performance. For uneven class distributions, accuracy can hide poor performance. Precision, recall, F1, and confusion-matrix values give a broader view.
+
+These methods support medical tools, image analysis, recommendations, language applications, and equipment maintenance. A model may overfit when it learns details specific to its training set instead of general patterns. Regularisation, cross-validation, careful feature selection, and evaluation on untouched examples help estimate its ability to generalise.

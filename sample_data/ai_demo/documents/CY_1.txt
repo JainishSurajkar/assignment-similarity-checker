@@ -1,0 +1,7 @@
+Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.

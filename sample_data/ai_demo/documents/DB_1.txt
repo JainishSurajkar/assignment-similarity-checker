@@ -1,0 +1,7 @@
+A database management system is software used to define, store, retrieve, and manage structured information. It provides an organised way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.

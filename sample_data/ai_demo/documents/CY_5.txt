@@ -1,0 +1,5 @@
+A family receiving an unexpected message claiming that a bank account will be blocked should avoid opening its link immediately. The message may imitate a familiar organisation and create urgency so that the recipient enters a password or one-time code on a fraudulent page.
+
+People can reduce this risk by checking the sender through an independent channel, visiting the bank's official application directly, and never sharing authentication codes. Organisations can help by teaching staff how to report suspicious messages and by providing a clear process for verifying unusual requests.
+
+If credentials are disclosed, the affected account should be secured promptly and the incident reported to the relevant provider. Reusing passwords can allow one compromised account to affect others, so unique passwords and multi-factor authentication are valuable safeguards. Awareness and a calm verification process are important parts of everyday digital safety.

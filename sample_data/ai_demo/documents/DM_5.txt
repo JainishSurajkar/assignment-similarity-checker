@@ -1,0 +1,5 @@
+A university can use information analysis to understand how students interact with its learning platform. For example, attendance records, submission dates, and quiz activity may be summarised to identify patterns that deserve attention. Such analysis should begin with a specific question and should use only information that the institution is permitted to process.
+
+A useful project would first inspect the available fields and check whether records are complete and consistent. Duplicate student entries and impossible dates should be investigated. Descriptive summaries can show overall activity, while charts can reveal changes across weeks or courses. Any predictive model should be tested on data that was not used to build it.
+
+The findings must be communicated carefully. A student who submits work late may have many reasons unrelated to ability or motivation. A statistical pattern is a signal for further investigation, not a final judgement about an individual. Access restrictions, data minimisation, and transparent procedures are important when educational records are analysed.

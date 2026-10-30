@@ -1,0 +1,7 @@
+Data mining aims to extract meaningful regularities, connections, and tendencies from sizeable datasets. It draws on statistics, machine learning, and database technology. The work normally starts by defining a question, for example whether customers are likely to leave a service or which goods tend to appear in the same shopping basket.
+
+The information must be prepared before algorithms are applied. Missing entries, repeated rows, incompatible formats, and unnecessary fields can affect the analysis. Typical preparation steps include correcting errors, combining sources, changing representations, and reducing the number of attributes. After preparation, analysts may use classification, clustering, association analysis, or anomaly detection.
+
+Different questions call for different techniques. Classification assigns an observation to a known class; clustering discovers groups without supplied class names. Association analysis finds items that appear together, whereas anomaly detection highlights unusual cases. The outcome needs appropriate evaluation and interpretation.
+
+Organisations use these methods in areas such as health services, finance, retail, education, and production. Applications include detecting suspicious transactions, estimating demand, suggesting products, and studying learning outcomes. Reliable conclusions require representative information, validation, privacy safeguards, and attention to bias. Association between two variables alone does not demonstrate causation.
