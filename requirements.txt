@@ -1,0 +1,12 @@
+streamlit
+numpy
+scikit-learn
+pandas
+pypdf
+python-docx
+pytesseract
+PyMuPDF>=1.24,<2
+Pillow
+matplotlib
+sentence-transformers
+pytest

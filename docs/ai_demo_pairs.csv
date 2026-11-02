@@ -1,0 +1,356 @@
+pair_id,text_a,text_b,label,reason,split
+DM01,"Data mining is the process of discovering useful patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data mining task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.
+","Data mining is the process of discovering useful patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data mining task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.
+",1,exact_copy,train
+DM02,"Data mining is the process of discovering useful patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data mining task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.
+","Data mining is the process of discovering valuable patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data analysis task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.
+",1,minor_edits,train
+DM03,"Data mining is the process of discovering useful patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data mining task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.
+","Data mining aims to extract meaningful regularities, connections, and tendencies from sizeable datasets. It draws on statistics, machine learning, and database technology. The work normally starts by defining a question, for example whether customers are likely to leave a service or which goods tend to appear in the same shopping basket.
+
+The information must be prepared before algorithms are applied. Missing entries, repeated rows, incompatible formats, and unnecessary fields can affect the analysis. Typical preparation steps include correcting errors, combining sources, changing representations, and reducing the number of attributes. After preparation, analysts may use classification, clustering, association analysis, or anomaly detection.
+
+Different questions call for different techniques. Classification assigns an observation to a known class; clustering discovers groups without supplied class names. Association analysis finds items that appear together, whereas anomaly detection highlights unusual cases. The outcome needs appropriate evaluation and interpretation.
+
+Organisations use these methods in areas such as health services, finance, retail, education, and production. Applications include detecting suspicious transactions, estimating demand, suggesting products, and studying learning outcomes. Reliable conclusions require representative information, validation, privacy safeguards, and attention to bias. Association between two variables alone does not demonstrate causation.
+",1,paraphrase,train
+DM04,"Data mining is the process of discovering useful patterns, relationships, and trends in large collections of data. It combines ideas from statistics, database systems, and machine learning. A typical data mining task begins with a clear problem, such as identifying customers who may stop using a service or finding products that are frequently purchased together.
+
+Before mining, data usually needs preparation. Missing values, duplicate records, inconsistent formats, and irrelevant attributes can reduce the quality of results. Cleaning, integration, transformation, and reduction are common preprocessing activities. The prepared data is then analysed with techniques such as classification, clustering, association rule mining, and anomaly detection.
+
+The choice of method depends on the question. Classification predicts a known category, while clustering groups records without predefined labels. Association rules describe items that occur together, and anomaly detection searches for unusual observations. Results should be evaluated with suitable measures and interpreted in the context of the original problem.
+
+Data mining is used in banking, healthcare, retail, education, and manufacturing. It can support fraud detection, demand forecasting, recommendation systems, and student performance analysis. However, useful results depend on representative data, careful validation, privacy protection, and awareness of bias. A discovered correlation should not automatically be treated as proof of cause and effect.
+","A university can use information analysis to understand how students interact with its learning platform. For example, attendance records, submission dates, and quiz activity may be summarised to identify patterns that deserve attention. Such analysis should begin with a specific question and should use only information that the institution is permitted to process.
+
+A useful project would first inspect the available fields and check whether records are complete and consistent. Duplicate student entries and impossible dates should be investigated. Descriptive summaries can show overall activity, while charts can reveal changes across weeks or courses. Any predictive model should be tested on data that was not used to build it.
+
+The findings must be communicated carefully. A student who submits work late may have many reasons unrelated to ability or motivation. A statistical pattern is a signal for further investigation, not a final judgement about an individual. Access restrictions, data minimisation, and transparent procedures are important when educational records are analysed.
+",0,independent_same_topic,train
+DM05,"A university can use information analysis to understand how students interact with its learning platform. For example, attendance records, submission dates, and quiz activity may be summarised to identify patterns that deserve attention. Such analysis should begin with a specific question and should use only information that the institution is permitted to process.
+
+A useful project would first inspect the available fields and check whether records are complete and consistent. Duplicate student entries and impossible dates should be investigated. Descriptive summaries can show overall activity, while charts can reveal changes across weeks or courses. Any predictive model should be tested on data that was not used to build it.
+
+The findings must be communicated carefully. A student who submits work late may have many reasons unrelated to ability or motivation. A statistical pattern is a signal for further investigation, not a final judgement about an individual. Access restrictions, data minimisation, and transparent procedures are important when educational records are analysed.
+","Data mining aims to extract meaningful regularities, connections, and tendencies from sizeable datasets. It draws on statistics, machine learning, and database technology. The work normally starts by defining a question, for example whether customers are likely to leave a service or which goods tend to appear in the same shopping basket.
+
+The information must be prepared before algorithms are applied. Missing entries, repeated rows, incompatible formats, and unnecessary fields can affect the analysis. Typical preparation steps include correcting errors, combining sources, changing representations, and reducing the number of attributes. After preparation, analysts may use classification, clustering, association analysis, or anomaly detection.
+
+Different questions call for different techniques. Classification assigns an observation to a known class; clustering discovers groups without supplied class names. Association analysis finds items that appear together, whereas anomaly detection highlights unusual cases. The outcome needs appropriate evaluation and interpretation.
+
+Organisations use these methods in areas such as health services, finance, retail, education, and production. Applications include detecting suspicious transactions, estimating demand, suggesting products, and studying learning outcomes. Reliable conclusions require representative information, validation, privacy safeguards, and attention to bias. Association between two variables alone does not demonstrate causation.
+",0,independent_vs_reused_answer,train
+ML01,"Machine learning is a field of artificial intelligence in which computer systems learn patterns from examples instead of relying only on fixed instructions. A model is trained using data and then applies what it has learned to make predictions or decisions about new observations. The quality of learning depends on the relevance, quantity, and reliability of the training data.
+
+In supervised learning, each training example has an input and a known target. Classification predicts categories, such as whether an email is spam, while regression predicts numerical values, such as house prices. In unsupervised learning, examples do not have target labels. Clustering is one method for discovering groups of similar observations.
+
+A machine learning workflow includes collecting data, preprocessing features, dividing data into training and testing portions, selecting an algorithm, fitting the model, and evaluating its performance. Accuracy alone may be misleading when classes are imbalanced. Precision, recall, F1-score, and a confusion matrix provide additional information for classification tasks.
+
+Machine learning is applied in image recognition, medical decision support, recommendation systems, language processing, and predictive maintenance. Models can also overfit by memorising training examples and performing poorly on new data. Cross-validation, regularisation, appropriate feature selection, and independent testing help assess whether a model generalises.
+","Machine learning is a field of artificial intelligence in which computer systems learn patterns from examples instead of relying only on fixed instructions. A model is trained using data and then applies what it has learned to make predictions or decisions about new observations. The quality of learning depends on the relevance, quantity, and reliability of the training data.
+
+In supervised learning, each training example has an input and a known target. Classification predicts categories, such as whether an email is spam, while regression predicts numerical values, such as house prices. In unsupervised learning, examples do not have target labels. Clustering is one method for discovering groups of similar observations.
+
+A machine learning workflow includes collecting data, preprocessing features, dividing data into training and testing portions, selecting an algorithm, fitting the model, and evaluating its performance. Accuracy alone may be misleading when classes are imbalanced. Precision, recall, F1-score, and a confusion matrix provide additional information for classification tasks.
+
+Machine learning is applied in image recognition, medical decision support, recommendation systems, language processing, and predictive maintenance. Models can also overfit by memorising training examples and performing poorly on new data. Cross-validation, regularisation, appropriate feature selection, and independent testing help assess whether a model generalises.
+",1,exact_copy,train
+ML02,"Machine learning is a field of artificial intelligence in which computer systems learn patterns from examples instead of relying only on fixed instructions. A model is trained using data and then applies what it has learned to make predictions or decisions about new observations. The quality of learning depends on the relevance, quantity, and reliability of the training data.
+
+In supervised learning, each training example has an input and a known target. Classification predicts categories, such as whether an email is spam, while regression predicts numerical values, such as house prices. In unsupervised learning, examples do not have target labels. Clustering is one method for discovering groups of similar observations.
+
+A machine learning workflow includes collecting data, preprocessing features, dividing data into training and testing portions, selecting an algorithm, fitting the model, and evaluating its performance. Accuracy alone may be misleading when classes are imbalanced. Precision, recall, F1-score, and a confusion matrix provide additional information for classification tasks.
+
+Machine learning is applied in image recognition, medical decision support, recommendation systems, language processing, and predictive maintenance. Models can also overfit by memorising training examples and performing poorly on new data. Cross-validation, regularisation, appropriate feature selection, and independent testing help assess whether a model generalises.
+","Machine learning is a field of artificial intelligence in which computer systems learn patterns from examples instead of relying only on fixed instructions. A model is trained using data and then applies what it has learned to make predictions or decisions about new observations. The quality of learning depends on the relevance, quantity, and reliability of the training data.
+
+In supervised learning, each training example has an input and a known target. Classification predicts categories, such as whether an email is spam, while regression predicts numerical values, such as house prices. In unsupervised learning, examples do not have target labels. Clustering is one method for discovering groups of similar observations.
+
+A machine learning workflow includes collecting data, preprocessing features, dividing data into training and testing portions, selecting an algorithm, fitting the model, and evaluating its performance. Accuracy alone may be misleading when classes are imbalanced. Precision, recall, F1-score, and a confusion matrix provide additional information for classification tasks.
+
+Machine learning is applied in image recognition, medical decision support, recommendation systems, language processing, and predictive maintenance. Models can also overfit by memorising training examples and performing poorly on new data. Cross-validation, regularisation, appropriate feature selection, and independent testing help assess whether a model generalises.
+",1,minor_edits,train
+ML03,"Machine learning is a field of artificial intelligence in which computer systems learn patterns from examples instead of relying only on fixed instructions. A model is trained using data and then applies what it has learned to make predictions or decisions about new observations. The quality of learning depends on the relevance, quantity, and reliability of the training data.
+
+In supervised learning, each training example has an input and a known target. Classification predicts categories, such as whether an email is spam, while regression predicts numerical values, such as house prices. In unsupervised learning, examples do not have target labels. Clustering is one method for discovering groups of similar observations.
+
+A machine learning workflow includes collecting data, preprocessing features, dividing data into training and testing portions, selecting an algorithm, fitting the model, and evaluating its performance. Accuracy alone may be misleading when classes are imbalanced. Precision, recall, F1-score, and a confusion matrix provide additional information for classification tasks.
+
+Machine learning is applied in image recognition, medical decision support, recommendation systems, language processing, and predictive maintenance. Models can also overfit by memorising training examples and performing poorly on new data. Cross-validation, regularisation, appropriate feature selection, and independent testing help assess whether a model generalises.
+","In machine learning, a computer program improves its task performance by learning regularities from examples. Rather than specifying every decision as a fixed rule, developers train a model on data so it can respond to previously unseen cases. Results are strongly affected by whether the examples are relevant, sufficient, and trustworthy.
+
+Learning with labelled examples is called supervised learning. It includes classification, which chooses a category such as spam or not spam, and regression, which estimates a quantity such as a property's value. Unsupervised methods work without target answers; clustering can reveal groups within the observations.
+
+A normal workflow gathers and prepares data, separates examples for training and testing, chooses a method, fits its parameters, and measures performance. For uneven class distributions, accuracy can hide poor performance. Precision, recall, F1, and confusion-matrix values give a broader view.
+
+These methods support medical tools, image analysis, recommendations, language applications, and equipment maintenance. A model may overfit when it learns details specific to its training set instead of general patterns. Regularisation, cross-validation, careful feature selection, and evaluation on untouched examples help estimate its ability to generalise.
+",1,paraphrase,train
+ML04,"Machine learning is a field of artificial intelligence in which computer systems learn patterns from examples instead of relying only on fixed instructions. A model is trained using data and then applies what it has learned to make predictions or decisions about new observations. The quality of learning depends on the relevance, quantity, and reliability of the training data.
+
+In supervised learning, each training example has an input and a known target. Classification predicts categories, such as whether an email is spam, while regression predicts numerical values, such as house prices. In unsupervised learning, examples do not have target labels. Clustering is one method for discovering groups of similar observations.
+
+A machine learning workflow includes collecting data, preprocessing features, dividing data into training and testing portions, selecting an algorithm, fitting the model, and evaluating its performance. Accuracy alone may be misleading when classes are imbalanced. Precision, recall, F1-score, and a confusion matrix provide additional information for classification tasks.
+
+Machine learning is applied in image recognition, medical decision support, recommendation systems, language processing, and predictive maintenance. Models can also overfit by memorising training examples and performing poorly on new data. Cross-validation, regularisation, appropriate feature selection, and independent testing help assess whether a model generalises.
+","A practical example of an intelligent system is a phone keyboard that suggests the next word while a person types. The software uses language patterns and context to rank possible suggestions. The user can accept a suggestion, ignore it, or continue typing, so the system assists rather than replaces the writer.
+
+Building such a feature involves collecting suitable text, representing words and context numerically, and learning which suggestions are likely in a given situation. The design must consider response time because a suggestion that appears too slowly is not useful. It should also handle uncommon names and multiple languages.
+
+Evaluation should include more than a single success percentage. Developers can measure how often the desired word appears among the top suggestions, how frequently suggestions are rejected, and whether performance differs across language groups. Training text should be handled responsibly because messages can contain private information.
+",0,independent_same_topic,train
+ML05,"A practical example of an intelligent system is a phone keyboard that suggests the next word while a person types. The software uses language patterns and context to rank possible suggestions. The user can accept a suggestion, ignore it, or continue typing, so the system assists rather than replaces the writer.
+
+Building such a feature involves collecting suitable text, representing words and context numerically, and learning which suggestions are likely in a given situation. The design must consider response time because a suggestion that appears too slowly is not useful. It should also handle uncommon names and multiple languages.
+
+Evaluation should include more than a single success percentage. Developers can measure how often the desired word appears among the top suggestions, how frequently suggestions are rejected, and whether performance differs across language groups. Training text should be handled responsibly because messages can contain private information.
+","In machine learning, a computer program improves its task performance by learning regularities from examples. Rather than specifying every decision as a fixed rule, developers train a model on data so it can respond to previously unseen cases. Results are strongly affected by whether the examples are relevant, sufficient, and trustworthy.
+
+Learning with labelled examples is called supervised learning. It includes classification, which chooses a category such as spam or not spam, and regression, which estimates a quantity such as a property's value. Unsupervised methods work without target answers; clustering can reveal groups within the observations.
+
+A normal workflow gathers and prepares data, separates examples for training and testing, chooses a method, fits its parameters, and measures performance. For uneven class distributions, accuracy can hide poor performance. Precision, recall, F1, and confusion-matrix values give a broader view.
+
+These methods support medical tools, image analysis, recommendations, language applications, and equipment maintenance. A model may overfit when it learns details specific to its training set instead of general patterns. Regularisation, cross-validation, careful feature selection, and evaluation on untouched examples help estimate its ability to generalise.
+",0,independent_vs_reused_answer,train
+DB01,"A database management system is software used to define, store, retrieve, and manage structured information. It provides an organised way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.
+","A database management system is software used to define, store, retrieve, and manage structured information. It provides an organised way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.
+",1,exact_copy,train
+DB02,"A database management system is software used to define, store, retrieve, and manage structured information. It provides an organised way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.
+","A database management system is software used to define, store, retrieve, and manage structured information. It provides an organized way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.
+",1,minor_edits,train
+DB03,"A database management system is software used to define, store, retrieve, and manage structured information. It provides an organised way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.
+","A DBMS is an application that lets people create, organise, search, and maintain stored information. It supports reliable access for users and software while helping enforce rules about consistency and permissions. In a relational design, data is arranged into tables containing records and fields.
+
+Keys establish identity and relationships: a primary key distinguishes a row, and a foreign key refers to a row in another table. Normalisation separates information into suitable tables to limit repetition and modification problems. SQL provides commands for defining structures and querying or changing records.
+
+A transaction treats a group of operations as one logical action. ACID refers to atomicity, consistency, isolation, and durability. Index structures can improve retrieval speed, but they consume space and add work when records change. Their use should match the application's access patterns.
+
+Relational systems support services such as hospital records, financial applications, university administration, bookings, and online shopping. Reliable operation also depends on backups, recovery planning, authentication, authorisation, and protection against unauthorised disclosure.
+",1,paraphrase,train
+DB04,"A database management system is software used to define, store, retrieve, and manage structured information. It provides an organised way for applications and users to work with data while controlling access and maintaining consistency. A relational database stores information in tables made up of rows and columns.
+
+A table represents an entity or relationship. A primary key uniquely identifies each row, while a foreign key connects records in related tables. Normalisation organises tables to reduce unnecessary duplication and update anomalies. SQL is commonly used to create tables, insert records, modify data, and retrieve information with queries.
+
+Transactions group database operations into a logical unit. The ACID properties describe important transaction guarantees: atomicity, consistency, isolation, and durability. Indexes can speed up searches, although they require storage and may slow down data modification. Database designers therefore consider expected query patterns when selecting indexes.
+
+Database systems are used in banking, reservation platforms, hospitals, universities, and online stores. They help maintain reliable records and support concurrent users. Security controls, backups, access permissions, and recovery procedures are essential because data loss or unauthorised disclosure can have serious consequences.
+","Consider an online bookstore that needs to manage customers, books, orders, and payments. Staff need to find a customer's order, check stock, and record whether payment has been received. Keeping all details in one large spreadsheet would make updates difficult and could create inconsistent copies of the same information.
+
+A database application can provide separate screens for searching the catalogue, placing an order, and updating inventory. Business rules can prevent an order from referring to a book that does not exist. Reports can summarise sales by month or identify items that need replenishment.
+
+The system should be designed around the tasks users perform. Common searches may need indexes, and important operations should be protected by transactions. Different staff roles should receive only the permissions required for their work. Backups and recovery tests are necessary so that the business can continue after equipment failure.
+",0,independent_same_topic,train
+DB05,"Consider an online bookstore that needs to manage customers, books, orders, and payments. Staff need to find a customer's order, check stock, and record whether payment has been received. Keeping all details in one large spreadsheet would make updates difficult and could create inconsistent copies of the same information.
+
+A database application can provide separate screens for searching the catalogue, placing an order, and updating inventory. Business rules can prevent an order from referring to a book that does not exist. Reports can summarise sales by month or identify items that need replenishment.
+
+The system should be designed around the tasks users perform. Common searches may need indexes, and important operations should be protected by transactions. Different staff roles should receive only the permissions required for their work. Backups and recovery tests are necessary so that the business can continue after equipment failure.
+","A DBMS is an application that lets people create, organise, search, and maintain stored information. It supports reliable access for users and software while helping enforce rules about consistency and permissions. In a relational design, data is arranged into tables containing records and fields.
+
+Keys establish identity and relationships: a primary key distinguishes a row, and a foreign key refers to a row in another table. Normalisation separates information into suitable tables to limit repetition and modification problems. SQL provides commands for defining structures and querying or changing records.
+
+A transaction treats a group of operations as one logical action. ACID refers to atomicity, consistency, isolation, and durability. Index structures can improve retrieval speed, but they consume space and add work when records change. Their use should match the application's access patterns.
+
+Relational systems support services such as hospital records, financial applications, university administration, bookings, and online shopping. Reliable operation also depends on backups, recovery planning, authentication, authorisation, and protection against unauthorised disclosure.
+",0,independent_vs_reused_answer,train
+CC01,"Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.
+","Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.
+",1,exact_copy,validation
+CC02,"Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.
+","Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.
+",1,minor_edits,validation
+CC03,"Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.
+","With cloud computing, organisations obtain technology services through a network instead of operating every computing component themselves. Processing power, storage, databases, and complete software products can be provisioned from a provider. Capacity may be adjusted as demand changes.
+
+The main service categories describe how much the provider manages. IaaS supplies fundamental infrastructure such as virtual machines and networks. PaaS gives developers a managed platform for application development and deployment. SaaS makes a finished application available to its users.
+
+A public cloud offers services on shared provider infrastructure. A private cloud is reserved for a particular organisation, and a hybrid design combines private and public environments. The appropriate arrangement depends on workload, governance, and information sensitivity.
+
+Potential advantages include rapid provisioning, flexible capacity, and reduced need to operate physical equipment. Nevertheless, customers must still manage identities, encryption, backup arrangements, location requirements, and configuration. Provider interruptions and dependence on a vendor should be considered. Spending also needs oversight because idle services and network transfers may increase bills.
+",1,paraphrase,validation
+CC04,"Cloud computing provides computing resources such as servers, storage, databases, and software over a network. Instead of purchasing and maintaining all infrastructure locally, an organisation can obtain resources from a cloud provider when required. Resources can often be increased or reduced according to workload.
+
+Common service models include Infrastructure as a Service, Platform as a Service, and Software as a Service. Infrastructure services provide virtual machines, networks, and storage. Platform services offer managed environments for building and deploying applications. Software services deliver complete applications through a browser or client.
+
+Cloud deployments may be public, private, or hybrid. Public clouds share provider infrastructure among customers, while private clouds are dedicated to one organisation. Hybrid approaches combine environments and may keep sensitive workloads in a controlled location while using public resources for variable demand.
+
+Cloud computing can improve flexibility, availability, and operational efficiency, but it does not remove every responsibility. Organisations must consider identity management, encryption, backups, data location, service outages, and vendor dependence. Costs also need monitoring because unused resources and data transfer can create unexpected charges.
+","A small company launching a seasonal shopping website may experience large changes in visitor traffic. Buying enough physical servers for the busiest day could leave expensive equipment unused for much of the year. Renting computing capacity can make it easier to respond to demand without owning every machine.
+
+The company still has to design its application, protect customer information, monitor performance, and plan for service interruptions. A cloud provider operates much of the underlying infrastructure, but the customer remains responsible for many configuration choices. Poorly protected storage or exposed credentials can still cause a security incident.
+
+A sensible adoption plan estimates normal and peak usage, identifies information that needs special protection, and compares expected costs. Teams should test backups and recovery procedures before relying on the service. Cloud migration is therefore a business and operational decision, not simply moving files to another computer.
+",0,independent_same_topic,validation
+CC05,"A small company launching a seasonal shopping website may experience large changes in visitor traffic. Buying enough physical servers for the busiest day could leave expensive equipment unused for much of the year. Renting computing capacity can make it easier to respond to demand without owning every machine.
+
+The company still has to design its application, protect customer information, monitor performance, and plan for service interruptions. A cloud provider operates much of the underlying infrastructure, but the customer remains responsible for many configuration choices. Poorly protected storage or exposed credentials can still cause a security incident.
+
+A sensible adoption plan estimates normal and peak usage, identifies information that needs special protection, and compares expected costs. Teams should test backups and recovery procedures before relying on the service. Cloud migration is therefore a business and operational decision, not simply moving files to another computer.
+","With cloud computing, organisations obtain technology services through a network instead of operating every computing component themselves. Processing power, storage, databases, and complete software products can be provisioned from a provider. Capacity may be adjusted as demand changes.
+
+The main service categories describe how much the provider manages. IaaS supplies fundamental infrastructure such as virtual machines and networks. PaaS gives developers a managed platform for application development and deployment. SaaS makes a finished application available to its users.
+
+A public cloud offers services on shared provider infrastructure. A private cloud is reserved for a particular organisation, and a hybrid design combines private and public environments. The appropriate arrangement depends on workload, governance, and information sensitivity.
+
+Potential advantages include rapid provisioning, flexible capacity, and reduced need to operate physical equipment. Nevertheless, customers must still manage identities, encryption, backup arrangements, location requirements, and configuration. Provider interruptions and dependence on a vendor should be considered. Spending also needs oversight because idle services and network transfers may increase bills.
+",0,independent_vs_reused_answer,validation
+CY01,"Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+","Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+",1,exact_copy,test
+CY02,"Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+","Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+",1,minor_edits,test
+CY03,"Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+","The goal of cybersecurity is to keep digital systems and their information safe from misuse, unauthorised changes, and interruption. Three widely used objectives are confidentiality, integrity, and availability. They mean that information is seen only by permitted people, remains accurate, and can be accessed when required.
+
+Threats can take the form of deceptive emails, harmful software, extortion attacks, stolen passwords, or weaknesses in applications. An attacker might persuade a user to disclose login details or exploit an unpatched service. Updating software, enabling more than one authentication factor, and teaching users to recognise suspicious activity can lower risk.
+
+Defence usually combines several controls. Network filters regulate connections, device security tools watch endpoints, encryption protects information, and permissions limit access. Copies of important data make restoration possible after failures or malicious encryption. Monitoring can reveal unusual behaviour and should be supported by an incident-handling process.
+
+Security needs continuous attention. Risk reviews identify valuable assets and likely dangers. Response plans describe how to recognise an incident, limit its impact, investigate it, and restore operations. Staff awareness, privacy protection, and regular reassessment are as important as technical products.
+",1,paraphrase,test
+CY04,"Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+","A family receiving an unexpected message claiming that a bank account will be blocked should avoid opening its link immediately. The message may imitate a familiar organisation and create urgency so that the recipient enters a password or one-time code on a fraudulent page.
+
+People can reduce this risk by checking the sender through an independent channel, visiting the bank's official application directly, and never sharing authentication codes. Organisations can help by teaching staff how to report suspicious messages and by providing a clear process for verifying unusual requests.
+
+If credentials are disclosed, the affected account should be secured promptly and the incident reported to the relevant provider. Reusing passwords can allow one compromised account to affect others, so unique passwords and multi-factor authentication are valuable safeguards. Awareness and a calm verification process are important parts of everyday digital safety.
+",0,independent_same_topic,test
+CY05,"A family receiving an unexpected message claiming that a bank account will be blocked should avoid opening its link immediately. The message may imitate a familiar organisation and create urgency so that the recipient enters a password or one-time code on a fraudulent page.
+
+People can reduce this risk by checking the sender through an independent channel, visiting the bank's official application directly, and never sharing authentication codes. Organisations can help by teaching staff how to report suspicious messages and by providing a clear process for verifying unusual requests.
+
+If credentials are disclosed, the affected account should be secured promptly and the incident reported to the relevant provider. Reusing passwords can allow one compromised account to affect others, so unique passwords and multi-factor authentication are valuable safeguards. Awareness and a calm verification process are important parts of everyday digital safety.
+","The goal of cybersecurity is to keep digital systems and their information safe from misuse, unauthorised changes, and interruption. Three widely used objectives are confidentiality, integrity, and availability. They mean that information is seen only by permitted people, remains accurate, and can be accessed when required.
+
+Threats can take the form of deceptive emails, harmful software, extortion attacks, stolen passwords, or weaknesses in applications. An attacker might persuade a user to disclose login details or exploit an unpatched service. Updating software, enabling more than one authentication factor, and teaching users to recognise suspicious activity can lower risk.
+
+Defence usually combines several controls. Network filters regulate connections, device security tools watch endpoints, encryption protects information, and permissions limit access. Copies of important data make restoration possible after failures or malicious encryption. Monitoring can reveal unusual behaviour and should be supported by an incident-handling process.
+
+Security needs continuous attention. Risk reviews identify valuable assets and likely dangers. Response plans describe how to recognise an incident, limit its impact, investigate it, and restore operations. Staff awareness, privacy protection, and regular reassessment are as important as technical products.
+",0,independent_vs_reused_answer,test

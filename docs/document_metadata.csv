@@ -1,0 +1,26 @@
+document_id,topic,relationship_type,source
+DM_1,Data Mining,original,synthetic
+DM_2,Data Mining,exact_copy,synthetic
+DM_3,Data Mining,minor_edits,synthetic
+DM_4,Data Mining,paraphrase,synthetic
+DM_5,Data Mining,independent_same_topic,synthetic
+ML_1,Machine Learning,original,synthetic
+ML_2,Machine Learning,exact_copy,synthetic
+ML_3,Machine Learning,minor_edits,synthetic
+ML_4,Machine Learning,paraphrase,synthetic
+ML_5,Machine Learning,independent_same_topic,synthetic
+DB_1,Database Management Systems,original,synthetic
+DB_2,Database Management Systems,exact_copy,synthetic
+DB_3,Database Management Systems,minor_edits,synthetic
+DB_4,Database Management Systems,paraphrase,synthetic
+DB_5,Database Management Systems,independent_same_topic,synthetic
+CC_1,Cloud Computing,original,synthetic
+CC_2,Cloud Computing,exact_copy,synthetic
+CC_3,Cloud Computing,minor_edits,synthetic
+CC_4,Cloud Computing,paraphrase,synthetic
+CC_5,Cloud Computing,independent_same_topic,synthetic
+CY_1,Cybersecurity,original,synthetic
+CY_2,Cybersecurity,exact_copy,synthetic
+CY_3,Cybersecurity,minor_edits,synthetic
+CY_4,Cybersecurity,paraphrase,synthetic
+CY_5,Cybersecurity,independent_same_topic,synthetic

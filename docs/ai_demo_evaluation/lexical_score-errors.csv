@@ -1,0 +1,27 @@
+pair_id,text_a,text_b,label,predicted_label,error_type,lexical_score,reason
+CY04,"Cybersecurity is the practice of protecting computers, networks, applications, and information from unauthorised access, disruption, or damage. Security programmes aim to preserve confidentiality, integrity, and availability. Confidentiality limits information to authorised users, integrity protects it from improper changes, and availability ensures that systems can be used when needed.
+
+Common threats include phishing, malware, ransomware, password attacks, and exploitation of software weaknesses. Attackers may trick people into revealing credentials or use malicious code to gain access. Regular software updates, multi-factor authentication, secure configuration, and user awareness training reduce several common risks.
+
+Organisations use multiple layers of protection. Firewalls control network traffic, endpoint protection monitors devices, encryption protects data, and access controls restrict permissions. Backups support recovery after accidental deletion or ransomware incidents. Security monitoring can help identify unusual activity, but alerts need investigation and a planned response.
+
+Cybersecurity is an ongoing process rather than a one-time installation. Risk assessments help prioritise important assets and likely threats. Incident response plans define how teams detect, contain, investigate, and recover from attacks. Effective security also requires privacy awareness, staff participation, and regular review as technology and threats change.
+","A family receiving an unexpected message claiming that a bank account will be blocked should avoid opening its link immediately. The message may imitate a familiar organisation and create urgency so that the recipient enters a password or one-time code on a fraudulent page.
+
+People can reduce this risk by checking the sender through an independent channel, visiting the bank's official application directly, and never sharing authentication codes. Organisations can help by teaching staff how to report suspicious messages and by providing a clear process for verifying unusual requests.
+
+If credentials are disclosed, the affected account should be secured promptly and the incident reported to the relevant provider. Reusing passwords can allow one compromised account to affect others, so unique passwords and multi-factor authentication are valuable safeguards. Awareness and a calm verification process are important parts of everyday digital safety.
+",0,1,False positive,38.65433644632933,independent_same_topic
+CY05,"A family receiving an unexpected message claiming that a bank account will be blocked should avoid opening its link immediately. The message may imitate a familiar organisation and create urgency so that the recipient enters a password or one-time code on a fraudulent page.
+
+People can reduce this risk by checking the sender through an independent channel, visiting the bank's official application directly, and never sharing authentication codes. Organisations can help by teaching staff how to report suspicious messages and by providing a clear process for verifying unusual requests.
+
+If credentials are disclosed, the affected account should be secured promptly and the incident reported to the relevant provider. Reusing passwords can allow one compromised account to affect others, so unique passwords and multi-factor authentication are valuable safeguards. Awareness and a calm verification process are important parts of everyday digital safety.
+","The goal of cybersecurity is to keep digital systems and their information safe from misuse, unauthorised changes, and interruption. Three widely used objectives are confidentiality, integrity, and availability. They mean that information is seen only by permitted people, remains accurate, and can be accessed when required.
+
+Threats can take the form of deceptive emails, harmful software, extortion attacks, stolen passwords, or weaknesses in applications. An attacker might persuade a user to disclose login details or exploit an unpatched service. Updating software, enabling more than one authentication factor, and teaching users to recognise suspicious activity can lower risk.
+
+Defence usually combines several controls. Network filters regulate connections, device security tools watch endpoints, encryption protects information, and permissions limit access. Copies of important data make restoration possible after failures or malicious encryption. Monitoring can reveal unusual behaviour and should be supported by an incident-handling process.
+
+Security needs continuous attention. Risk reviews identify valuable assets and likely dangers. Response plans describe how to recognise an incident, limit its impact, investigate it, and restore operations. Staff awareness, privacy protection, and regular reassessment are as important as technical products.
+",0,1,False positive,48.533630587462305,independent_vs_reused_answer
